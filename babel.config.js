@@ -8,9 +8,7 @@ module.exports = function (api) {
         targets: {
           browsers: ['> 2%', 'last 2 versions', 'not ie <= 8'],
         },
-        useBuiltIns: 'entry',
         modules: false,
-        corejs: 3
       },
     ],
   ];
