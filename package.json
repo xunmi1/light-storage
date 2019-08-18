@@ -6,7 +6,7 @@
   "module": "dist/light-storage.esm.js",
   "scripts": {
     "build": "rollup -c scripts/rollup.config.js",
-    "test": "jest && codecov",
+    "test": "jest",
     "lint": "eslint --fix --ext .js src"
   },
   "repository": {

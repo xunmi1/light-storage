@@ -28,6 +28,21 @@ function _createClass(Constructor, protoProps, staticProps) {
   return Constructor;
 }
 
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
 function _classPrivateFieldGet(receiver, privateMap) {
   var descriptor = privateMap.get(receiver);
 
@@ -107,24 +122,26 @@ function () {
       }
     });
 
-    if (Object.prototype.toString.call(window.localStorage) !== '[object Storage]') {
+    var context = window || self || globalThis;
+
+    if (Object.prototype.toString.call(context.localStorage) !== '[object Storage]') {
       throw new TypeError('当前运行环境不支持 localStorage');
     }
 
-    _classPrivateFieldSet(this, _localStorage, window.localStorage);
+    _classPrivateFieldSet(this, _localStorage, context.localStorage);
 
     this.prefix = prefix;
   }
 
   _createClass(LightStorage, [{
-    key: "toFullKey",
+    key: "getFullKey",
 
     /**
      * 获取实际键名
      * @param {string} key 查询键名
      * @return {string} 实际键名
      */
-    value: function toFullKey(key) {
+    value: function getFullKey(key) {
       if (key.slice(0, _classPrivateFieldGet(this, _prefix).length) === _classPrivateFieldGet(this, _prefix)) {
         return key;
       }
@@ -143,12 +160,12 @@ function () {
     key: "set",
     value: function set(key, value, expires) {
       var isUpdate = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-      key = this.toFullKey(key);
+      key = this.getFullKey(key);
       var data = {
         value: value
       };
-
-      if (typeof expires === 'number' && expires >= 0) {
+      if (expires && expires) if (typeof expires === 'number') {
+        if (expires < 0) throw new TypeError('请输入有效的有效期');
         data.time = isUpdate ? Date.now() : this.getCreatedTime(key) || Date.now();
         data.expires = expires;
       }
@@ -197,16 +214,28 @@ function () {
     /**
      * 获取完整数据
      * @param {string} key 键名
-     * @returns {number|undefined} 完整数据
+     * @returns {Object} 完整数据
      */
 
   }, {
     key: "getFullData",
     value: function getFullData(key) {
-      key = this.toFullKey(key);
+      key = this.getFullKey(key);
 
       if (_classPrivateFieldGet(this, _keys).has(key)) {
-        return JSON.parse(_classPrivateFieldGet(this, _localStorage).getItem(key) || '{}');
+        var origin = _classPrivateFieldGet(this, _localStorage).getItem(key) || '{}';
+
+        try {
+          var value = JSON.parse(origin);
+          var isOrigin = typeof value === 'boolean' || typeof value === 'number';
+          return isOrigin ? {
+            value: value
+          } : value;
+        } catch (e) {
+          return {
+            value: origin
+          };
+        }
       }
     }
     /**
@@ -218,7 +247,7 @@ function () {
   }, {
     key: "has",
     value: function has(key) {
-      key = this.toFullKey(key);
+      key = this.getFullKey(key);
       if (!_classPrivateFieldGet(this, _keys).has(key)) return false;
       var result = this.get(key);
       return result !== undefined;
@@ -232,7 +261,7 @@ function () {
   }, {
     key: "remove",
     value: function remove(key) {
-      key = this.toFullKey(key);
+      key = this.getFullKey(key);
 
       if (_classPrivateFieldGet(this, _keys).has(key)) {
         _classPrivateFieldGet(this, _localStorage).removeItem(key);
@@ -282,6 +311,8 @@ var _keys = new WeakMap();
 var _prefix = new WeakMap();
 
 var _initKeys = new WeakMap();
+
+_defineProperty(LightStorage, "version", void 0);
 
 LightStorage.version = version;
 
