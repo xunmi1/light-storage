@@ -31,13 +31,15 @@ describe('get data', () => {
 
   test('get origin value', () => {
     const key = 'origin value';
-    window.localStorage.setItem(`db-${key}`, '{"value": true}');
+    const fullKey = `db-${key}`;
+    window.localStorage.setItem(fullKey, '{"value": true}');
     const db = new LightStorage('db');
     expect(db.get(key)).toEqual(true);
-    window.localStorage.setItem(`db-${key}`, '100');
+    window.localStorage.setItem(fullKey, 100);
     expect(db.get(key)).toBe(100);
-    window.localStorage.setItem(`db-${key}`, 'fast');
-    expect(db.get(key)).toBe('fast');
+    window.localStorage.setItem(fullKey, 'faster');
+    expect(db.get(key)).toBe('faster');
+    db.clear();
   });
 
   test('has value', () => {
@@ -62,7 +64,7 @@ describe('check data', () => {
       arr: ['a', 'b', { c: 'c' }, null],
       bool: true,
       empty: null,
-      undef: undefined
+      undef: undefined,
     };
     Object.entries(mockData).forEach(([key, value]) => instance.set(key, value));
     const copyData = Object.keys(mockData).reduce((obj, key) => {
@@ -83,7 +85,7 @@ describe('check validity period', () => {
     instance.set(key, mockData, 10);
     expect(instance.get(key)).toBe(mockData);
     await delay(11);
-    expect(instance.get(key)).toBe(undefined);
+    expect(instance.get(key)).toBeUndefined();
     instance.clear();
   });
 

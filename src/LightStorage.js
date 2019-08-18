@@ -12,11 +12,13 @@ class LightStorage {
   #prefix;
 
   constructor (prefix = 'light-storage') {
-    const context = window || self || globalThis;
-    if (Object.prototype.toString.call(context.localStorage) !== '[object Storage]') {
+    try {
+      const context = window || self || globalThis;
+      this.#localStorage = context.localStorage;
+    } catch {
       throw new TypeError('当前运行环境不支持 localStorage');
     }
-    this.#localStorage = context.localStorage;
+
     this.prefix = prefix;
   }
 
@@ -118,7 +120,7 @@ class LightStorage {
         const value = JSON.parse(origin);
         const isOrigin = typeof value === 'boolean' || typeof value === 'number';
         return isOrigin ? { value } : value;
-      } catch (e) {
+      } catch {
         return { value: origin }
       }
     }
