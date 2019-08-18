@@ -1,5 +1,5 @@
 /**
- * light-storage v0.1.0
+ * light-storage v0.2.0
  * (c) 2019 xunmi
  * Released under the MIT License.
  */
@@ -10,7 +10,7 @@
   (global = global || self, global.LightStorage = factory());
 }(this, function () { 'use strict';
 
-  var version = "0.1.0";
+  var version = "0.2.0";
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -128,13 +128,13 @@
         }
       });
 
-      var context = window || self || globalThis;
+      try {
+        var context = window || self || globalThis;
 
-      if (Object.prototype.toString.call(context.localStorage) !== '[object Storage]') {
+        _classPrivateFieldSet(this, _localStorage, context.localStorage);
+      } catch (_unused) {
         throw new TypeError('当前运行环境不支持 localStorage');
       }
-
-      _classPrivateFieldSet(this, _localStorage, context.localStorage);
 
       this.prefix = prefix;
     }
@@ -237,7 +237,7 @@
             return isOrigin ? {
               value: value
             } : value;
-          } catch (e) {
+          } catch (_unused2) {
             return {
               value: origin
             };
