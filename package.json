@@ -6,6 +6,7 @@
   "module": "dist/light-storage.esm.js",
   "scripts": {
     "build": "rollup -c scripts/rollup.config.js",
+    "test": "jest",
     "lint": "eslint --fix --ext .js src"
   },
   "repository": {
@@ -28,7 +29,9 @@
     "@babel/plugin-proposal-private-methods": "^7.4.4",
     "@babel/preset-env": "^7.5.5",
     "babel-eslint": "^11.0.0-beta.0",
+    "babel-jest": "^24.9.0",
     "eslint": "^6.1.0",
+    "jest": "^24.9.0",
     "rollup": "^1.19.4",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^10.0.2",

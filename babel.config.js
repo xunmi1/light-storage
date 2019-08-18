@@ -1,14 +1,16 @@
 module.exports = function (api) {
+  const isTest = api.env('test');
   api.cache(true);
-
   const presets = [
     [
       '@babel/preset-env',
       {
         targets: {
           browsers: ['> 2%', 'last 2 versions', 'not ie <= 8'],
+          node: 'current',
+          esmodules: isTest,
         },
-        modules: false,
+        modules: isTest && 'auto',
       },
     ],
   ];
@@ -17,12 +19,10 @@ module.exports = function (api) {
     '@babel/plugin-proposal-private-methods'
   ];
   const exclude = 'node_modules/**';
-  const ignore = ['dist/*.js'];
 
   return {
     presets,
     plugins,
     exclude,
-    ignore,
   };
 };
