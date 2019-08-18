@@ -5,15 +5,18 @@
  * @author xunmi <xunmi1@outlook.com>
  */
 class LightStorage {
+  static version;
+
   #localStorage;
   #keys;
   #prefix;
 
   constructor (prefix = 'light-storage') {
-    if (Object.prototype.toString.call(window.localStorage) !== '[object Storage]') {
+    const context = window || self || globalThis;
+    if (Object.prototype.toString.call(context.localStorage) !== '[object Storage]') {
       throw new TypeError('当前运行环境不支持 localStorage');
     }
-    this.#localStorage = window.localStorage;
+    this.#localStorage = context.localStorage;
     this.prefix = prefix;
   }
 
@@ -45,7 +48,7 @@ class LightStorage {
    * @param {string} key 查询键名
    * @return {string} 实际键名
    */
-  toFullKey (key) {
+  getFullKey (key) {
     if (key.slice(0, this.#prefix.length) === this.#prefix) {
       return key;
     }
@@ -60,12 +63,14 @@ class LightStorage {
    * @param {boolean} [isUpdate=false] 是否更新创建时间
    */
   set (key, value, expires, isUpdate = false) {
-    key = this.toFullKey(key);
+    key = this.getFullKey(key);
     const data = { value };
-    if (typeof expires === 'number' && expires >= 0) {
-      data.time = isUpdate ? Date.now() : (this.getCreatedTime(key) || Date.now());
-      data.expires = expires;
-    }
+    if (expires && expires)
+      if (typeof expires === 'number') {
+        if (expires < 0) throw new TypeError('请输入有效的有效期');
+        data.time = isUpdate ? Date.now() : (this.getCreatedTime(key) || Date.now());
+        data.expires = expires;
+      }
     this.#localStorage.setItem(key, JSON.stringify(data));
     this.#keys.add(key);
   }
@@ -103,12 +108,19 @@ class LightStorage {
   /**
    * 获取完整数据
    * @param {string} key 键名
-   * @returns {number|undefined} 完整数据
+   * @returns {Object} 完整数据
    */
   getFullData (key) {
-    key = this.toFullKey(key);
+    key = this.getFullKey(key);
     if (this.#keys.has(key)) {
-      return JSON.parse(this.#localStorage.getItem(key) || '{}');
+      const origin = this.#localStorage.getItem(key) || '{}';
+      try {
+        const value = JSON.parse(origin);
+        const isOrigin = typeof value === 'boolean' || typeof value === 'number';
+        return isOrigin ? { value } : value;
+      } catch (e) {
+        return { value: origin }
+      }
     }
   }
 
@@ -118,7 +130,7 @@ class LightStorage {
    * @return {boolean}
    */
   has (key) {
-    key = this.toFullKey(key);
+    key = this.getFullKey(key);
     if (!this.#keys.has(key)) return false;
     const result = this.get(key);
     return result !== undefined;
@@ -130,7 +142,7 @@ class LightStorage {
    * @return {boolean}
    */
   remove (key) {
-    key = this.toFullKey(key);
+    key = this.getFullKey(key);
     if (this.#keys.has(key)) {
       this.#localStorage.removeItem(key);
       return this.#keys.delete(key);
