@@ -1,0 +1,10 @@
+language: node_js
+sudo: required
+cache: npm
+node_js:
+  - lts/*
+install:
+  - npm install -g codecov
+script:
+  - npm run test
+  - codecov
