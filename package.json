@@ -1,9 +1,13 @@
 {
   "name": "light-storage",
   "version": "0.2.0",
-  "description": "A lightweight tool for handing localStorage",
+  "description": "A lightweight tool for handing localStorage.",
   "main": "dist/light-storage.umd.js",
   "module": "dist/light-storage.esm.js",
+  "files": [
+    "src",
+    "dist/*.js"
+  ],
   "scripts": {
     "build": "rollup -c scripts/rollup.config.js",
     "test": "jest",
@@ -30,7 +34,7 @@
     "@babel/preset-env": "^7.5.5",
     "babel-eslint": "^11.0.0-beta.0",
     "babel-jest": "^24.9.0",
-    "eslint": "^6.1.0",
+    "eslint": "^6.2.0",
     "jest": "^24.9.0",
     "rollup": "^1.19.4",
     "rollup-plugin-babel": "^4.3.3",
