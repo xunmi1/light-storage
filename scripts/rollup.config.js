@@ -41,7 +41,7 @@ const terserOptions = {
 };
 
 export default {
-  input: 'src/main.js',
+  input: 'src/index.js',
   output,
   plugins: [
     eslint(eslintOptions),

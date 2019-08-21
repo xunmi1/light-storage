@@ -13,12 +13,10 @@ class LightStorage {
 
   constructor (prefix = 'light-storage') {
     try {
-      const context = window || self || globalThis;
-      this.#localStorage = context.localStorage;
+      this.#localStorage = (window || self).localStorage;
     } catch {
-      throw new TypeError('当前运行环境不支持 localStorage');
+      throw new TypeError('Current environment does not support localStorage');
     }
-
     this.prefix = prefix;
   }
 
@@ -46,6 +44,24 @@ class LightStorage {
   };
 
   /**
+   * 获取完整数据
+   * @param {string} key 键名
+   * @returns {Object} 完整数据
+   */
+  #getFullData = key => {
+    key = this.getFullKey(key);
+    if (this.#keys.has(key)) {
+      const origin = this.#localStorage.getItem(key);
+      try {
+        const value = JSON.parse(origin);
+        return typeof value === 'object' ? value : { value };
+      } catch {
+        return { value: origin };
+      }
+    }
+  };
+
+  /**
    * 获取实际键名
    * @param {string} key 查询键名
    * @return {string} 实际键名
@@ -61,18 +77,19 @@ class LightStorage {
    * 添加数据
    * @param {string} key 键名，在内部会转换
    * @param {any} value 键值
-   * @param {number} [expires] 有效期
-   * @param {boolean} [isUpdate=false] 是否更新创建时间
+   * @param {number} [timeLimit] 有效期
+   * @param {boolean} [update=false] 是否更新创建时间
    */
-  set (key, value, expires, isUpdate = false) {
+  set (key, value, timeLimit, update = false) {
     key = this.getFullKey(key);
-    const data = { value };
-    if (expires && expires)
-      if (typeof expires === 'number') {
-        if (expires < 0) throw new TypeError('请输入有效的有效期');
-        data.time = isUpdate ? Date.now() : (this.getCreatedTime(key) || Date.now());
-        data.expires = expires;
+    const data = { value, version: LightStorage.version };
+    if (timeLimit) {
+      if (typeof timeLimit !== 'number' || timeLimit < 0) {
+        throw new TypeError('请输入有效的有效期');
       }
+      data.time = update ? Date.now() : (this.getCreatedTime(key) || Date.now());
+      data.timeLimit = timeLimit;
+    }
     this.#localStorage.setItem(key, JSON.stringify(data));
     this.#keys.add(key);
   }
@@ -84,10 +101,10 @@ class LightStorage {
    * @returns {any} 键值，若过期，则自动删除，返回默认值
    */
   get (key, defaultValue) {
-    const data = this.getFullData(key);
+    const data = this.#getFullData(key);
     if (data && data.value !== undefined) {
       if (!data.time) return data.value;
-      const valid = (Date.now() - data.time) < data.expires;
+      const valid = (Date.now() - data.time) < data.timeLimit;
       if (valid) return data.value;
       this.remove(key);
       return defaultValue;
@@ -101,28 +118,9 @@ class LightStorage {
    * @returns {number|undefined} 创建时间
    */
   getCreatedTime (key) {
-    const data = this.getFullData(key);
+    const data = this.#getFullData(key);
     if (data && data.time) {
       return data.time;
-    }
-  }
-
-  /**
-   * 获取完整数据
-   * @param {string} key 键名
-   * @returns {Object} 完整数据
-   */
-  getFullData (key) {
-    key = this.getFullKey(key);
-    if (this.#keys.has(key)) {
-      const origin = this.#localStorage.getItem(key) || '{}';
-      try {
-        const value = JSON.parse(origin);
-        const isOrigin = typeof value === 'boolean' || typeof value === 'number';
-        return isOrigin ? { value } : value;
-      } catch {
-        return { value: origin }
-      }
     }
   }
 
