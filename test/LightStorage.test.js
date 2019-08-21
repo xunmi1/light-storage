@@ -1,4 +1,4 @@
-import LightStorage from '../src/main';
+import LightStorage from '../src';
 
 const delay = timeout => new Promise(resolve => setTimeout(resolve, timeout));
 
@@ -22,19 +22,20 @@ describe('create', () => {
 const instance = new LightStorage('test');
 
 describe('get data', () => {
-  const key = 'defaultValue';
-  const defaultValue = { value: true, label: '获取默认值' };
-
   test('get default value', () => {
+    const key = 'get data';
+    const defaultValue = { value: true, label: '获取默认值' };
     expect(instance.get(key, defaultValue)).toEqual(defaultValue);
   });
 
   test('get origin value', () => {
     const key = 'origin value';
-    const fullKey = `db-${key}`;
+    const fullKey = `light-storage-${key}`;
+    window.localStorage.setItem(key, '{"value": true}');
     window.localStorage.setItem(fullKey, '{"value": true}');
-    const db = new LightStorage('db');
-    expect(db.get(key)).toEqual(true);
+    const db = new LightStorage();
+    expect(db.get(key)).toBe(true);
+    expect(db.get(fullKey)).toBe(true);
     window.localStorage.setItem(fullKey, 100);
     expect(db.get(key)).toBe(100);
     window.localStorage.setItem(fullKey, 'faster');
@@ -43,8 +44,9 @@ describe('get data', () => {
   });
 
   test('has value', () => {
+    const key = 'undefined';
     expect(instance.has(key)).toBe(false);
-    instance.set(key, defaultValue);
+    instance.set(key, key);
     expect(instance.has(key)).toBe(true);
   });
 });
