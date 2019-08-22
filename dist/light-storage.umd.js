@@ -1,5 +1,5 @@
 /**
- * light-storage v0.2.0
+ * light-storage v0.2.1
  * (c) 2019 xunmi
  * Released under the MIT License.
  */
@@ -10,7 +10,21 @@
   (global = global || self, global.LightStorage = factory());
 }(this, function () { 'use strict';
 
-  var version = "0.2.0";
+  var version = "0.2.1";
+
+  function _typeof(obj) {
+    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
+      _typeof = function (obj) {
+        return typeof obj;
+      };
+    } else {
+      _typeof = function (obj) {
+        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+      };
+    }
+
+    return _typeof(obj);
+  }
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -128,12 +142,32 @@
         }
       });
 
-      try {
-        var context = window || self || globalThis;
+      _getFullData.set(this, {
+        writable: true,
+        value: function value(key) {
+          key = _this.getFullKey(key);
 
-        _classPrivateFieldSet(this, _localStorage, context.localStorage);
-      } catch (_unused) {
-        throw new TypeError('当前运行环境不支持 localStorage');
+          if (_classPrivateFieldGet(_this, _keys).has(key)) {
+            var origin = _classPrivateFieldGet(_this, _localStorage).getItem(key);
+
+            try {
+              var value = JSON.parse(origin);
+              return _typeof(value) === 'object' ? value : {
+                value: value
+              };
+            } catch (_unused) {
+              return {
+                value: origin
+              };
+            }
+          }
+        }
+      });
+
+      try {
+        _classPrivateFieldSet(this, _localStorage, (window || self).localStorage);
+      } catch (_unused2) {
+        throw new TypeError('Current environment does not support localStorage');
       }
 
       this.prefix = prefix;
@@ -158,22 +192,27 @@
        * 添加数据
        * @param {string} key 键名，在内部会转换
        * @param {any} value 键值
-       * @param {number} [expires] 有效期
-       * @param {boolean} [isUpdate=false] 是否更新创建时间
+       * @param {number} [timeLimit] 有效期
+       * @param {boolean} [update=false] 是否更新创建时间
        */
 
     }, {
       key: "set",
-      value: function set(key, value, expires) {
-        var isUpdate = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+      value: function set(key, value, timeLimit) {
+        var update = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
         key = this.getFullKey(key);
         var data = {
-          value: value
+          value: value,
+          version: LightStorage.version
         };
-        if (expires && expires) if (typeof expires === 'number') {
-          if (expires < 0) throw new TypeError('请输入有效的有效期');
-          data.time = isUpdate ? Date.now() : this.getCreatedTime(key) || Date.now();
-          data.expires = expires;
+
+        if (timeLimit) {
+          if (typeof timeLimit !== 'number' || timeLimit < 0) {
+            throw new TypeError('Please enter a valid time limit');
+          }
+
+          data.time = update ? Date.now() : this.getCreatedTime(key) || Date.now();
+          data.timeLimit = timeLimit;
         }
 
         _classPrivateFieldGet(this, _localStorage).setItem(key, JSON.stringify(data));
@@ -190,11 +229,11 @@
     }, {
       key: "get",
       value: function get(key, defaultValue) {
-        var data = this.getFullData(key);
+        var data = _classPrivateFieldGet(this, _getFullData).call(this, key);
 
         if (data && data.value !== undefined) {
           if (!data.time) return data.value;
-          var valid = Date.now() - data.time < data.expires;
+          var valid = Date.now() - data.time < data.timeLimit;
           if (valid) return data.value;
           this.remove(key);
           return defaultValue;
@@ -211,37 +250,10 @@
     }, {
       key: "getCreatedTime",
       value: function getCreatedTime(key) {
-        var data = this.getFullData(key);
+        var data = _classPrivateFieldGet(this, _getFullData).call(this, key);
 
         if (data && data.time) {
           return data.time;
-        }
-      }
-      /**
-       * 获取完整数据
-       * @param {string} key 键名
-       * @returns {Object} 完整数据
-       */
-
-    }, {
-      key: "getFullData",
-      value: function getFullData(key) {
-        key = this.getFullKey(key);
-
-        if (_classPrivateFieldGet(this, _keys).has(key)) {
-          var origin = _classPrivateFieldGet(this, _localStorage).getItem(key) || '{}';
-
-          try {
-            var value = JSON.parse(origin);
-            var isOrigin = typeof value === 'boolean' || typeof value === 'number';
-            return isOrigin ? {
-              value: value
-            } : value;
-          } catch (_unused2) {
-            return {
-              value: origin
-            };
-          }
         }
       }
       /**
@@ -317,6 +329,8 @@
   var _prefix = new WeakMap();
 
   var _initKeys = new WeakMap();
+
+  var _getFullData = new WeakMap();
 
   _defineProperty(LightStorage, "version", void 0);
 
