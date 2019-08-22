@@ -85,7 +85,7 @@ class LightStorage {
     const data = { value, version: LightStorage.version };
     if (timeLimit) {
       if (typeof timeLimit !== 'number' || timeLimit < 0) {
-        throw new TypeError('请输入有效的有效期');
+        throw new TypeError('Please enter a valid time limit');
       }
       data.time = update ? Date.now() : (this.getCreatedTime(key) || Date.now());
       data.timeLimit = timeLimit;

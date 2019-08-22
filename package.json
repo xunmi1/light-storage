@@ -6,7 +6,8 @@
   "module": "dist/light-storage.esm.js",
   "files": [
     "src",
-    "dist/*.js"
+    "dist/*.js",
+    "types/*.d.ts"
   ],
   "scripts": {
     "build": "rollup -c scripts/rollup.config.js",
@@ -27,6 +28,7 @@
     "url": "https://github.com/xunmi1/light-storage/issues"
   },
   "homepage": "https://github.com/xunmi1/light-storage#readme",
+  "types": "types/index.d.ts",
   "devDependencies": {
     "@babel/core": "^7.5.5",
     "@babel/plugin-proposal-class-properties": "^7.5.5",
