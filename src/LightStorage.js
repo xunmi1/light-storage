@@ -76,7 +76,7 @@ class LightStorage {
   /**
    * 添加数据
    * @param {string} key 键名，在内部会转换
-   * @param {any} value 键值
+   * @param {*} value 键值
    * @param {number} [timeLimit] 有效期
    * @param {boolean} [update=false] 是否更新创建时间
    */
@@ -97,8 +97,8 @@ class LightStorage {
   /**
    * 访问数据
    * @param {string} key 键名
-   * @param {any} [defaultValue] 默认值
-   * @returns {any} 键值，若过期，则自动删除，返回默认值
+   * @param {*} [defaultValue] 默认值
+   * @returns {*} 键值，若过期，则自动删除，返回默认值
    */
   get (key, defaultValue) {
     const data = this.#getFullData(key);
