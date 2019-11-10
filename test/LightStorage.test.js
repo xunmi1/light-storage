@@ -2,7 +2,6 @@ import LightStorage from '../src';
 
 const delay = timeout => new Promise(resolve => setTimeout(resolve, timeout));
 
-
 describe('create', () => {
   const prefix = 'mock-test';
   const storage = new LightStorage(prefix);
@@ -21,6 +20,8 @@ describe('create', () => {
 
 const instance = new LightStorage('test');
 
+afterEach(() => instance.clear());
+
 describe('get data', () => {
   test('get default value', () => {
     const key = 'get data';
@@ -31,8 +32,9 @@ describe('get data', () => {
   test('get origin value', () => {
     const key = 'origin value';
     const fullKey = `light-storage-${key}`;
-    window.localStorage.setItem(key, '{"value": true}');
-    window.localStorage.setItem(fullKey, '{"value": true}');
+    const origin = JSON.stringify({ value: true });
+    window.localStorage.setItem(key, origin);
+    window.localStorage.setItem(fullKey, origin);
     const db = new LightStorage();
     expect(db.get(key)).toBe(true);
     expect(db.get(fullKey)).toBe(true);
@@ -88,20 +90,18 @@ describe('check validity period', () => {
     expect(instance.get(key)).toBe(mockData);
     await delay(11);
     expect(instance.get(key)).toBeUndefined();
-    instance.clear();
   });
 
-  test('cover time', async () => {
-    const key = 'cover';
+  test('update time limit', async () => {
+    const key = 'timeLimit';
     instance.set(key, mockData, 10);
     await delay(5);
     instance.set(key, mockData, 10);
     expect(instance.get(key)).toBe(mockData);
-    instance.clear();
   });
 
-  test('update time', async () => {
-    const key = 'update';
+  test('update created time', async () => {
+    const key = 'createdTime';
     instance.set(key, mockData, 50);
     await delay(10);
     instance.set(key, mockData, 50, true);
@@ -109,17 +109,16 @@ describe('check validity period', () => {
     expect(instance.get(key)).toBe(mockData);
     await delay(40);
     expect(instance.get(key)).toBeUndefined();
-    instance.clear();
   });
 
   test('error time', () => {
-    const testError = () => instance.set('mock', mockData, -50);
-    expect(testError).toThrowError(TypeError);
+    const trigger = () => instance.set('mock', mockData, -50);
+    expect(trigger).toThrowError(TypeError);
   });
 });
 
 
-describe('clear', () => {
+describe('remove one', () => {
   test('remove one', () => {
     instance.set('mock', true, 50);
     instance.set('mock-copy', true);
