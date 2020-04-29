@@ -30,7 +30,7 @@ class LightStorage {
   }
 
   /**
-   * TODO babel-eslint 11.0.0-beta.0 bug
+   * TODO babel-eslint bug
    * @see https://github.com/babel/babel-eslint/issues/749
    */
   #initKeys = () => {

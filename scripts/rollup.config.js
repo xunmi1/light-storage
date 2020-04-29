@@ -8,7 +8,7 @@ import { author, name, version } from '../package.json';
 
 const currentYear = new Date().getFullYear();
 const banner =
-`/**
+`/*!
  * ${name} v${version}
  * (c) ${currentYear > 2019 ? '2019-' : ''}${currentYear} ${author}
  * Released under the MIT License.

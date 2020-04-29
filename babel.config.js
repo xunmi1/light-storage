@@ -6,11 +6,10 @@ module.exports = function (api) {
       '@babel/preset-env',
       {
         targets: {
-          browsers: ['> 2%', 'last 2 versions', 'not ie <= 8'],
+          browsers: '> 2%, last 2 versions, not ie <= 8, not dead',
           node: 'current',
           esmodules: isTest,
         },
-        modules: isTest && 'auto',
       },
     ],
   ];

@@ -1,6 +1,6 @@
-/**
- * light-storage v0.2.1
- * (c) 2019 xunmi
+/*!
+ * light-storage v0.2.2
+ * (c) 2019-2020 xunmi
  * Released under the MIT License.
  */
 
@@ -10,9 +10,11 @@
   (global = global || self, global.LightStorage = factory());
 }(this, (function () { 'use strict';
 
-  var version = "0.2.1";
+  var version = "0.2.2";
 
   function _typeof(obj) {
+    "@babel/helpers - typeof";
+
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
       _typeof = function (obj) {
         return typeof obj;
@@ -103,9 +105,7 @@
    * @param {string} prefix - 自定义前缀
    * @author xunmi <xunmi1@outlook.com>
    */
-  var LightStorage =
-  /*#__PURE__*/
-  function () {
+  var LightStorage = /*#__PURE__*/function () {
     function LightStorage() {
       var _this = this;
 
@@ -313,7 +313,7 @@
         _classPrivateFieldGet(this, _initKeys).call(this);
       }
       /**
-       * TODO babel-eslint 11.0.0-beta.0 bug
+       * TODO babel-eslint bug
        * @see https://github.com/babel/babel-eslint/issues/749
        */
 

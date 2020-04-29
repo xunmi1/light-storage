@@ -1,11 +1,10 @@
 {
   "name": "light-storage",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A lightweight tool for handing localStorage.",
   "main": "dist/light-storage.umd.js",
   "module": "dist/light-storage.esm.js",
   "files": [
-    "src",
     "dist/*.js",
     "types/*.d.ts"
   ],
@@ -30,20 +29,20 @@
   "homepage": "https://github.com/xunmi1/light-storage#readme",
   "types": "types/index.d.ts",
   "devDependencies": {
-    "@babel/core": "^7.7.2",
-    "@babel/plugin-proposal-class-properties": "^7.7.0",
-    "@babel/plugin-proposal-private-methods": "^7.6.0",
-    "@babel/preset-env": "^7.7.1",
-    "babel-eslint": "^11.0.0-beta.0",
-    "babel-jest": "^24.9.0",
-    "eslint": "^6.6.0",
-    "jest": "^24.9.0",
-    "rollup": "^1.26.4",
-    "rollup-plugin-babel": "^4.3.3",
+    "@babel/core": "^7.9.0",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-proposal-private-methods": "^7.8.3",
+    "@babel/preset-env": "^7.9.5",
+    "babel-eslint": "^10.1.0",
+    "babel-jest": "^25.5.0",
+    "eslint": "^6.8.0",
+    "jest": "^25.5.0",
+    "rollup": "^1.32.1",
+    "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-eslint": "^7.0.0",
     "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-terser": "^5.1.2"
+    "rollup-plugin-terser": "^5.3.0"
   }
 }
