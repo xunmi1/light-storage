@@ -1,3 +1,5 @@
+const prettierConfig = require('@xunmi/prettier-config');
+
 module.exports = {
   root: true,
   env: {
@@ -7,16 +9,16 @@ module.exports = {
   parser: 'babel-eslint',
   extends: [
     'eslint:recommended',
+    'plugin:prettier/recommended',
   ],
+  plugins: ['prettier'],
   parserOptions: {
     sourceType: 'module',
   },
   rules: {
     'no-console': 'error',
-    'indent': ['warn', 2],
     'no-undef': 'off',
     'no-var': 'error',
-    'no-eval': 'error',
     'eqeqeq': ['error', 'always', { 'null': 'ignore' }],
     'array-callback-return': 'error',
     'no-labels': 'error',
@@ -31,18 +33,10 @@ module.exports = {
     'no-extend-native': 'error',
     'no-unused-expressions': 'error',
     'object-shorthand': 'warn',
-    'quotes': ['error', 'single'],
     'no-useless-escape': 'error',
-    'arrow-parens': ['warn', 'as-needed'],
-    'arrow-body-style': 'warn',
     'dot-notation': 'error',
     'no-unneeded-ternary': 'error',
-    'no-mixed-operators': 'warn',
-    'space-before-blocks': 'warn',
-    'keyword-spacing': 'error',
-    'space-infix-ops': 'error',
-    'space-in-parens': ['error', 'never'],
-    'array-bracket-spacing': ['error', 'never'],
-    'no-new-wrappers': 'error',
+    // prettier config
+    'prettier/prettier': ['error', prettierConfig],
   },
 };

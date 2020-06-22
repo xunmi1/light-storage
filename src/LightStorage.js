@@ -11,7 +11,7 @@ class LightStorage {
   #keys;
   #prefix;
 
-  constructor (prefix = 'light-storage') {
+  constructor(prefix = 'light-storage') {
     try {
       this.#localStorage = (window || self).localStorage;
     } catch {
@@ -20,11 +20,11 @@ class LightStorage {
     this.prefix = prefix;
   }
 
-  get prefix () {
+  get prefix() {
     return this.#prefix;
   }
 
-  set prefix (value) {
+  set prefix(value) {
     this.#prefix = value;
     this.#initKeys();
   }
@@ -66,7 +66,7 @@ class LightStorage {
    * @param {string} key 查询键名
    * @return {string} 实际键名
    */
-  getFullKey (key) {
+  getFullKey(key) {
     if (key.slice(0, this.#prefix.length) === this.#prefix) {
       return key;
     }
@@ -80,14 +80,14 @@ class LightStorage {
    * @param {number} [timeLimit] 有效期
    * @param {boolean} [update=false] 是否更新创建时间
    */
-  set (key, value, timeLimit, update = false) {
+  set(key, value, timeLimit, update = false) {
     key = this.getFullKey(key);
     const data = { value, version: LightStorage.version };
     if (timeLimit) {
       if (typeof timeLimit !== 'number' || timeLimit < 0) {
         throw new TypeError('Please enter a valid time limit');
       }
-      data.time = update ? Date.now() : (this.getCreatedTime(key) || Date.now());
+      data.time = update ? Date.now() : this.getCreatedTime(key) || Date.now();
       data.timeLimit = timeLimit;
     }
     this.#localStorage.setItem(key, JSON.stringify(data));
@@ -100,11 +100,11 @@ class LightStorage {
    * @param {*} [defaultValue] 默认值
    * @returns {*} 键值，若过期，则自动删除，返回默认值
    */
-  get (key, defaultValue) {
+  get(key, defaultValue) {
     const data = this.#getFullData(key);
     if (data && data.value !== undefined) {
       if (!data.time) return data.value;
-      const valid = (Date.now() - data.time) < data.timeLimit;
+      const valid = Date.now() - data.time < data.timeLimit;
       if (valid) return data.value;
       this.remove(key);
       return defaultValue;
@@ -117,7 +117,7 @@ class LightStorage {
    * @param {string} key 键名
    * @returns {number|undefined} 创建时间
    */
-  getCreatedTime (key) {
+  getCreatedTime(key) {
     const data = this.#getFullData(key);
     if (data && data.time) {
       return data.time;
@@ -129,7 +129,7 @@ class LightStorage {
    * @param {string} key - 数据键名
    * @return {boolean}
    */
-  has (key) {
+  has(key) {
     key = this.getFullKey(key);
     if (!this.#keys.has(key)) return false;
     const result = this.get(key);
@@ -141,7 +141,7 @@ class LightStorage {
    * @param {string} key - 数据键名
    * @return {boolean}
    */
-  remove (key) {
+  remove(key) {
     key = this.getFullKey(key);
     if (this.#keys.has(key)) {
       this.#localStorage.removeItem(key);
@@ -153,7 +153,7 @@ class LightStorage {
   /**
    * 清理全部数据
    */
-  clear () {
+  clear() {
     this.#keys.forEach(key => this.remove(key));
   }
 }
