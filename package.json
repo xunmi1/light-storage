@@ -7,7 +7,7 @@
   "types": "dist/light-storage.d.ts",
   "files": ["dist"],
   "scripts": {
-    "build": "npm run build-ts && npm run build-rollup && build-dts && rimraf .cache",
+    "build": "npm run build-ts && npm run build-rollup && npm run build-dts && rimraf .cache",
     "build-ts": "rimraf types && tsc -p tsconfig.json --outDir .cache",
     "build-rollup": "rimraf dist && rollup -c scripts/rollup.config.js  -i .cache/src/index.js",
     "build-dts": "api-extractor run --local",
@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/xunmi1/light-storage#readme",
   "devDependencies": {
+    "@types/jest": "^26.0.3",
     "@babel/core": "^7.10.4",
     "@babel/preset-env": "^7.10.4",
     "@babel/preset-typescript": "^7.10.4",

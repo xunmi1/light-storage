@@ -1,4 +1,5 @@
 import { version } from '../package.json';
+import { isObject, isNumber } from './utils';
 
 interface LightStorageValue<T> {
   value: T;
@@ -8,7 +9,7 @@ interface LightStorageValue<T> {
 }
 
 interface OriginValue<T> {
-  value?: T | string;
+  value?: T;
 }
 
 /**
@@ -25,9 +26,10 @@ class LightStorage {
 
   constructor(prefix = 'light-storage') {
     try {
-      this.localStorage = (window || self).localStorage;
+      const root = globalThis ?? self ?? window;
+      this.localStorage = root.localStorage;
     } catch {
-      throw new TypeError('Current environment does not support localStorage');
+      throw new Error('Current environment does not support localStorage');
     }
     this.prefix = prefix;
   }
@@ -67,9 +69,9 @@ class LightStorage {
 
       try {
         const data = JSON.parse(origin);
-        return typeof data === 'object' ? data : { value: data };
+        return isObject(data) ? data : { value: data };
       } catch {
-        return { value: origin };
+        return { value: (origin as unknown) as T };
       }
     }
     return { value: undefined };
@@ -87,6 +89,11 @@ class LightStorage {
     return `${this._prefix}-${key}`;
   }
 
+  private static isValid(data: LightStorageValue<unknown>) {
+    const { time, maxAge } = data;
+    return time && maxAge ? Date.now() - time <= maxAge : true;
+  }
+
   /**
    * 添加数据
    * @param key 键名，在内部会转换
@@ -94,12 +101,12 @@ class LightStorage {
    * @param [maxAge] 有效期
    * @param [update=false] 是否更新创建时间
    */
-  set<T>(key: string, value: T, maxAge?: number, update = false) {
+  set<T = any>(key: string, value: T, maxAge?: number, update = false) {
     key = this.getCompleteKey(key);
     const data: LightStorageValue<T> = { value, version: LightStorage.version };
     if (maxAge) {
-      if (typeof maxAge !== 'number' || maxAge <= 0) {
-        throw new TypeError('Please enter a valid time limit');
+      if (!isNumber(maxAge) || maxAge <= 0) {
+        throw new TypeError('maxAge is invalid, and must be a number');
       }
       const now = Date.now();
       data.time = update ? now : this.getCreatedTime(key) ?? now;
@@ -115,15 +122,12 @@ class LightStorage {
    * @param [defaultValue] 默认值
    * @returns 键值，若过期，则自动删除，返回默认值
    */
-  get<T>(key: string, defaultValue?: T) {
+  get<T = any>(key: string, defaultValue?: T) {
     const data = this.getCompleteData<T>(key);
 
-    if (this.isFormSelf(key, data) && data.maxAge && data.time) {
-      const isExpires = Date.now() - data.time > data.maxAge;
-      if (isExpires) {
-        this.remove(key);
-        return defaultValue;
-      }
+    if (this.isFormSelf(key, data) && !LightStorage.isValid(data)) {
+      this.remove(key);
+      return defaultValue;
     }
 
     return data.value === undefined ? defaultValue : data.value;

@@ -1,6 +1,6 @@
 import LightStorage from '../src';
 
-const delay = timeout => new Promise(resolve => setTimeout(resolve, timeout));
+const delay = (timeout: number) => new Promise(resolve => setTimeout(resolve, timeout));
 
 describe('create', () => {
   const prefix = 'mock-test';
@@ -38,10 +38,8 @@ describe('get data', () => {
     const db = new LightStorage();
     expect(db.get(key)).toBe(true);
     expect(db.get(fullKey)).toBe(true);
-    window.localStorage.setItem(fullKey, 100);
+    window.localStorage.setItem(fullKey, '100');
     expect(db.get(key)).toBe(100);
-    window.localStorage.setItem(fullKey, 'faster');
-    expect(db.get(key)).toBe('faster');
     db.clear();
   });
 
