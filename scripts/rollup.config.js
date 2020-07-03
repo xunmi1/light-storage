@@ -1,16 +1,15 @@
-import babel from 'rollup-plugin-babel';
-import resolve from 'rollup-plugin-node-resolve';
-import json from 'rollup-plugin-json';
-import commonjs from 'rollup-plugin-commonjs';
-import { eslint } from "rollup-plugin-eslint";
+import json from '@rollup/plugin-json';
+import resolve from '@rollup/plugin-node-resolve';
 import { terser } from 'rollup-plugin-terser';
-import { author, name, version } from '../package.json';
+import pkg from '../package.json';
+
+const RUNTIME_CONTEXT = 'window';
 
 const currentYear = new Date().getFullYear();
 const banner =
 `/*!
- * ${name} v${version}
- * (c) ${currentYear > 2019 ? '2019-' : ''}${currentYear} ${author}
+ * ${pkg.name} v${pkg.version}
+ * (c) ${currentYear > 2019 ? '2019-' : ''}${currentYear} ${pkg.author}
  * Released under the MIT License.
  */
 `;
@@ -22,34 +21,18 @@ const outputFileList = [
   { format: 'esm', min: true },
 ];
 
-const output = outputFileList.map(value => {
-  value.file = `dist/light-storage.${value.format}${value.min ? '.min' : ''}.js`;
-  value.sourcemap = !value.min;
-  value.banner = banner;
-  return value;
+const output = outputFileList.map(({ name, format, min }) => {
+  const file = `dist/${pkg.name}.${format}${min ? '.min' : ''}.js`;
+  const plugins = min ? [terser()] : [];
+  return { file, name, format, banner, sourcemap: false, plugins };
 });
 
-const eslintOptions = {
-  fix: true,
-  throwOnError: true,
-  include: 'src/*.js'
-};
-
-const terserOptions = {
-  include: [/^.+\.min\.js$/],
-  output: { comments: `/${name} v${version}/` },
-};
-
 export default {
-  input: 'src/index.js',
+  context: RUNTIME_CONTEXT,
   output,
   plugins: [
-    eslint(eslintOptions),
-    resolve(),
     json(),
-    babel(),
-    commonjs(),
-    terser(terserOptions),
+    resolve(),
   ],
 };
 

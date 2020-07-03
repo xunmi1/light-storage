@@ -6,22 +6,18 @@ module.exports = function (api) {
       '@babel/preset-env',
       {
         targets: {
-          browsers: '> 2%, last 2 versions, not ie <= 8, not dead',
-          node: 'current',
-          esmodules: isTest,
+          browsers: '> 1%, last 2 versions, not dead',
+          esmodules: isTest ? true : undefined,
         },
+        spec: true,
       },
     ],
-  ];
-  const plugins = [
-    '@babel/plugin-proposal-class-properties',
-    '@babel/plugin-proposal-private-methods'
+    '@babel/preset-typescript'
   ];
   const exclude = 'node_modules/**';
 
   return {
     presets,
-    plugins,
     exclude,
   };
 };
