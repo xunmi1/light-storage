@@ -5,13 +5,14 @@
   "main": "dist/light-storage.umd.js",
   "module": "dist/light-storage.esm.js",
   "types": "dist/light-storage.d.ts",
-  "files": ["dist/*.js"],
+  "files": ["dist"],
   "scripts": {
-    "build": "npm run build-ts && npm run build-rollup && api-extractor run --local && rimraf .cache",
+    "build": "npm run build-ts && npm run build-rollup && build-dts && rimraf .cache",
     "build-ts": "rimraf types && tsc -p tsconfig.json --outDir .cache",
     "build-rollup": "rimraf dist && rollup -c scripts/rollup.config.js  -i .cache/src/index.js",
+    "build-dts": "api-extractor run --local",
     "lint": "prettier --write --parser typescript \"src/**/*.ts\"",
-    "test": "jest"
+    "test": "rimraf coverage && jest"
   },
   "repository": {
     "type": "git",

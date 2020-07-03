@@ -3,6 +3,6 @@ module.exports = {
   collectCoverage: true,
   coverageDirectory: 'coverage',
   collectCoverageFrom: [
-    'src/**.ts',
+    'src/**/*.{js,ts}',
   ],
 };
