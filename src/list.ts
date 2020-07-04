@@ -1,5 +1,6 @@
 class List<T = string>{
   private data: T[];
+  /* istanbul ignore next */
   constructor(list: T[] = []) {
     this.data = [...list];
   }

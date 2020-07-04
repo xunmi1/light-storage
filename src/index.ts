@@ -44,13 +44,14 @@ class LightStorage {
     this.initKeys();
   }
 
+  get size() {
+    this.initKeys();
+    return this.keys.size;
+  }
+
   private initKeys() {
-    this.keys = new List<string>();
-    Object.keys(this.localStorage).forEach(key => {
-      if (key.startsWith(this._prefix)) {
-        this.keys.add(key);
-      }
-    });
+    const keys = Object.keys(this.localStorage).filter(key => key.startsWith(this._prefix));
+    this.keys = new List(keys);
   }
 
   private isFormSelf<T>(key: string, data: LightStorageValue<T> | OriginValue<T>): data is LightStorageValue<T> {
@@ -64,18 +65,20 @@ class LightStorage {
    */
   private getCompleteData<T>(key: string): LightStorageValue<T> | OriginValue<T> {
     key = this.getCompleteKey(key);
-    if (this.keys.has(key)) {
-      const origin = this.localStorage.getItem(key);
-      if (origin == null) return { value: undefined };
-
-      try {
-        const data = JSON.parse(origin);
-        return isObject(data) ? data : { value: data };
-      } catch {
-        return { value: (origin as unknown) as T };
-      }
+    const origin = this.localStorage.getItem(key);
+    // if use `localStorage.removeItem`, remove keys
+    if (origin == null) {
+      this.keys.delete(key);
+      return { value: undefined };
     }
-    return { value: undefined };
+
+    try {
+      this.keys.add(key);
+      const data = JSON.parse(origin);
+      return isObject(data) ? data : { value: data };
+    } catch {
+      return { value: (origin as unknown) as T };
+    }
   }
 
   /**
