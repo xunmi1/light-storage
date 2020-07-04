@@ -52,10 +52,11 @@ class LightStorage {
   private initKeys() {
     const keys = Object.keys(this.localStorage).filter(key => key.startsWith(this._prefix));
     this.keys = new List(keys);
+    this.keys.forEach(k => this.handleExpired(k));
   }
 
   private isFormSelf<T>(key: string, data: LightStorageValue<T> | OriginValue<T>): data is LightStorageValue<T> {
-    return this.has(key) && (data as LightStorageValue<T>).version !== undefined;
+    return this.keys.has(key) && (data as LightStorageValue<T>).version !== undefined;
   }
 
   /**
@@ -95,7 +96,11 @@ class LightStorage {
 
   private static isValid(data: LightStorageValue<unknown>) {
     const { time, maxAge } = data;
-    return time && maxAge ? Date.now() - time <= maxAge : true;
+    if (time && maxAge) {
+      const age = Date.now() - time;
+      return age >= 0 && age <= maxAge;
+    }
+    return true;
   }
 
   /**
@@ -108,12 +113,13 @@ class LightStorage {
   set<T = any>(key: string, value: T, maxAge?: number, update = false) {
     key = this.getCompleteKey(key);
     const data: LightStorageValue<T> = { value, version: LightStorage.version };
+    const now = Date.now();
+    data.time = update ? now : this.getCreatedTime(key) ?? now;
+
     if (maxAge) {
-      if (!isNumber(maxAge) || maxAge <= 0) {
-        throw new TypeError('maxAge is invalid, and must be a number');
+      if (!isNumber(maxAge) || maxAge < 0) {
+        throw new TypeError('maxAge is invalid, and must be a non-negative number');
       }
-      const now = Date.now();
-      data.time = update ? now : this.getCreatedTime(key) ?? now;
       data.maxAge = maxAge;
     }
     this.localStorage.setItem(key, JSON.stringify(data));
@@ -126,14 +132,20 @@ class LightStorage {
    * @param [defaultValue] 默认值
    * @returns 键值，若过期，则自动删除，返回默认值
    */
-  get<T = any>(key: string, defaultValue?: T) {
+  get<T = any>(key: string, defaultValue?: T): T | undefined {
+    const data = this.handleExpired(key);
+    return data?.value === undefined ? defaultValue : data.value;
+  }
+
+  private handleExpired<T = any>(key: string) {
+    key = this.getCompleteKey(key);
     const data = this.getCompleteData<T>(key);
     if (this.isFormSelf(key, data) && !LightStorage.isValid(data)) {
       this.remove(key);
-      return defaultValue;
+      return;
     }
 
-    return data.value === undefined ? defaultValue : data.value;
+    return data;
   }
 
   /**
@@ -142,8 +154,8 @@ class LightStorage {
    * @returns 创建时间
    */
   getCreatedTime(key: string) {
-    const data = this.getCompleteData(key);
-    if (this.isFormSelf(key, data)) return data.time;
+    const data = this.handleExpired(key);
+    if (data && this.isFormSelf(key, data)) return data.time;
   }
 
   /**
@@ -153,7 +165,10 @@ class LightStorage {
    */
   has(key: string) {
     key = this.getCompleteKey(key);
-    return this.keys.has(key);
+    if (this.keys.has(key)) {
+      return !!this.handleExpired(key);
+    }
+    return false;
   }
 
   /**
@@ -163,11 +178,8 @@ class LightStorage {
    */
   remove(key: string) {
     key = this.getCompleteKey(key);
-    if (this.keys.has(key)) {
-      this.localStorage.removeItem(key);
-      return this.keys.delete(key);
-    }
-    return false;
+    this.localStorage.removeItem(key);
+    return this.keys.delete(key);
   }
 
   /**
