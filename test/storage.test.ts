@@ -18,48 +18,61 @@ describe('create', () => {
   });
 });
 
-const instance = new LightStorage('test');
-
-afterEach(() => instance.clear());
-
 describe('get data', () => {
+  const key = 'origin value';
+  const fullKey = `light-storage-${key}`;
+  const origin = JSON.stringify({ value: true });
+  window.localStorage.setItem(key, origin);
+  window.localStorage.setItem(fullKey, origin);
+  const db = new LightStorage();
+
+  test('get origin value', () => {
+    expect(db.get(key)).toBe(true);
+    expect(db.get(fullKey)).toBe(true);
+  });
+
   test('get default value', () => {
     const key = 'get data';
     const defaultValue = { value: true, label: '获取默认值' };
-    expect(instance.get(key, defaultValue)).toEqual(defaultValue);
+    expect(db.get(key, defaultValue)).toEqual(defaultValue);
   });
 
-  test('get origin value', () => {
-    const key = 'origin value';
-    const fullKey = `light-storage-${key}`;
-    const origin = JSON.stringify({ value: true });
-    window.localStorage.setItem(key, origin);
-    window.localStorage.setItem(fullKey, origin);
-    const db = new LightStorage();
-    expect(db.get(key)).toBe(true);
-    expect(db.get(fullKey)).toBe(true);
-    window.localStorage.setItem(fullKey, '100');
-    expect(db.get(key)).toBe(100);
-    db.clear();
-  });
+  test('use native removeItem', () => {
+    window.localStorage.removeItem(fullKey);
+    expect(db.get(key)).toBeUndefined();
+  })
 
-  test('has value', () => {
-    const key = 'undefined';
-    expect(instance.has(key)).toBe(false);
-    instance.set(key, key);
-    expect(instance.has(key)).toBe(true);
-  });
+  test('get unsafe data', () => {
+    const unsafeData = '[{];<>';
+    window.localStorage.setItem(fullKey, unsafeData);
+    expect(db.get(key)).toBe(unsafeData);
+  })
+
+  test('get number-like', () => {
+    const numberLike = '123456';
+    window.localStorage.setItem(fullKey, numberLike);
+    expect(db.get(key)).toBe(Number(numberLike));
+  })
+
 });
 
+/**
+ * use same instance
+ */
+const PREFIX = 'test';
+const instance = new LightStorage(PREFIX);
+
+afterEach(() => instance.clear());
+
+describe('has value', () => {
+  const key = 'undefined';
+  expect(instance.has(key)).toBe(false);
+  instance.set(key, key);
+  expect(instance.has(key)).toBe(true);
+});
 
 describe('check data', () => {
   test('set data', () => {
-    const mockData = 'light-storage';
-    instance.set('mock', mockData);
-    expect(instance.get('mock')).toBe(mockData);
-  });
-
-  test('data type', () => {
     const mockData = {
       str: 'A lightweight tool for handing localStorage',
       number: Math.random() * 1000,
@@ -90,12 +103,12 @@ describe('check validity period', () => {
     expect(instance.get(key)).toBeUndefined();
   });
 
-  test('update time limit', async () => {
-    const key = 'timeLimit';
+  test('update maxAge', async () => {
+    const key = 'maxAge';
+    instance.set(key, mockData, 20);
     instance.set(key, mockData, 10);
-    await delay(5);
-    instance.set(key, mockData, 10);
-    expect(instance.get(key)).toBe(mockData);
+    await delay(15);
+    expect(instance.get(key)).toBeUndefined();
   });
 
   test('update created time', async () => {
@@ -129,11 +142,31 @@ describe('remove one', () => {
     expect(instance.remove('undefined-mock')).toBe(false);
   });
 
-  test('clear all', () => {
-    instance.set('clear-mock', true, 50);
-    instance.set('clear-mock-copy', true);
-    instance.clear();
-    expect(instance.get('clear-mock')).toBeUndefined();
-    expect(instance.get('clear-mock-copy')).toBeUndefined();
-  });
 });
+
+describe('cleanup', () => {
+  instance.clear();
+  const keys = Object.keys(window.localStorage).filter(k => k.startsWith(PREFIX))
+  expect(keys.length).toBe(0);
+})
+
+describe('verify size', () => {
+  beforeAll(() => {
+    instance.clear();
+    instance.set('verify size', '');
+  })
+
+  test('size is one', () => {
+    expect(instance.size).toBe(1);
+  });
+
+  test('use native removeItem', () => {
+    window.localStorage.removeItem('verify size');
+    expect(instance.size).toBe(0);
+  });
+
+  test('size of new instance', () => {
+    const db = new LightStorage('new-instance-size');
+    expect(db.size).toBe(0);
+  })
+})

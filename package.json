@@ -12,7 +12,7 @@
     "build-rollup": "rimraf dist && rollup -c scripts/rollup.config.js  -i .cache/src/index.js",
     "build-dts": "api-extractor run --local",
     "lint": "prettier --write --parser typescript \"src/**/*.ts\"",
-    "test": "rimraf coverage && jest"
+    "test": "rimraf coverage && jest --runInBand"
   },
   "repository": {
     "type": "git",
