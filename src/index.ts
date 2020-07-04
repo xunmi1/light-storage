@@ -1,4 +1,5 @@
 import { version } from '../package.json';
+import List from './list';
 import { isObject, isNumber } from './utils';
 
 interface LightStorageValue<T> {
@@ -21,16 +22,16 @@ class LightStorage {
   static readonly version = version;
 
   private readonly localStorage: Storage;
-  private keys: Set<string>;
+  private keys: List<string>;
   private _prefix: string;
 
   constructor(prefix = 'light-storage') {
-    try {
-      const root = globalThis ?? self ?? window;
-      this.localStorage = root.localStorage;
-    } catch {
+    /* istanbul ignore next */
+    const root = globalThis ?? self ?? window;
+    if (root?.localStorage == null) {
       throw new Error('Current environment does not support localStorage');
     }
+    this.localStorage = root.localStorage;
     this.prefix = prefix;
   }
 
@@ -44,7 +45,7 @@ class LightStorage {
   }
 
   private initKeys() {
-    this.keys = new Set();
+    this.keys = new List<string>();
     Object.keys(this.localStorage).forEach(key => {
       if (key.startsWith(this._prefix)) {
         this.keys.add(key);
@@ -124,7 +125,6 @@ class LightStorage {
    */
   get<T = any>(key: string, defaultValue?: T) {
     const data = this.getCompleteData<T>(key);
-
     if (this.isFormSelf(key, data) && !LightStorage.isValid(data)) {
       this.remove(key);
       return defaultValue;
