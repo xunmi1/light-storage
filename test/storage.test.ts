@@ -88,7 +88,7 @@ describe('check validity period', () => {
 
   test('base time', async () => {
     const key = 'base';
-    instance.set(key, mockData, 10);
+    instance.set(key, mockData, { maxAge: 10 });
     expect(instance.get(key)).toBe(mockData);
     await delay(15);
     expect(instance.get(key)).toBeUndefined();
@@ -96,25 +96,25 @@ describe('check validity period', () => {
 
   test('update maxAge', async () => {
     const key = 'maxAge';
-    instance.set(key, mockData, 20);
-    instance.set(key, mockData, 10);
+    instance.set(key, mockData, { maxAge: 20 });
+    instance.set(key, mockData, { maxAge: 10 });
     await delay(15);
     expect(instance.get(key)).toBeUndefined();
   });
 
   test('update created time', async () => {
     const key = 'createdTime';
-    instance.set(key, mockData, 50);
+    instance.set(key, mockData, { maxAge: 20 });
     await delay(10);
-    instance.set(key, mockData, 50, true);
-    await delay(20);
+    instance.set(key, mockData, { maxAge: 20, update: true });
+    await delay(5);
     expect(instance.get(key)).toBe(mockData);
-    await delay(40);
+    await delay(20);
     expect(instance.get(key)).toBeUndefined();
   });
 
   test('error time', () => {
-    const trigger = () => instance.set('mock', mockData, -50);
+    const trigger = () => instance.set('mock', mockData, { maxAge: -1 });
     expect(trigger).toThrowError(TypeError);
   });
 });
@@ -128,7 +128,7 @@ describe('has value', () => {
   })
 
   test('has maxAge', async () => {
-    instance.set('maxAge', '', 5);
+    instance.set('maxAge', '', { maxAge: 5 });
     await delay(10);
     expect(instance.has('maxAge')).toBe(false);
   })
@@ -136,7 +136,7 @@ describe('has value', () => {
 
 describe('remove one', () => {
   test('remove one', () => {
-    instance.set('mock', true, 50);
+    instance.set('mock', true, { maxAge: 20 });
     expect(instance.remove('mock')).toBe(true);
     expect(instance.get('mock')).toBeUndefined();
   });
@@ -183,7 +183,7 @@ describe('verify size', () => {
   })
 
   test('has maxAge', async () => {
-    instance.set('maxAge', '', 5);
+    instance.set('maxAge', '', { maxAge: 5 });
     await delay(10);
     expect(instance.size).toBe(0);
   })

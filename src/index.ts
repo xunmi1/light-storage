@@ -107,12 +107,14 @@ class LightStorage {
    * 添加数据
    * @param key 键名，在内部会转换
    * @param value 键值
-   * @param [maxAge] 有效期
-   * @param [update=false] 是否更新创建时间
+   * @param options
+   * @param [options.maxAge] 有效期
+   * @param [options.update=false] 是否更新创建时间
    */
-  set<T = any>(key: string, value: T, maxAge?: number, update = false) {
+  set<T = any>(key: string, value: T, options?: { maxAge?: number; update?: boolean }) {
     key = this.getCompleteKey(key);
     const data: LightStorageValue<T> = { value, version: LightStorage.version };
+    const { maxAge, update } = options ?? {};
     const now = Date.now();
     data.time = update ? now : this.getCreatedTime(key) ?? now;
 
