@@ -32,26 +32,49 @@ class LightStorage {
       throw new Error('Current environment does not support localStorage');
     }
     this.localStorage = root.localStorage;
-    this.prefix = prefix;
+    this._prefix = prefix;
+    this.reload();
   }
 
   get prefix() {
     return this._prefix;
   }
 
+  /**
+   * Modify prefix
+   * @param value
+   */
   set prefix(value: string) {
+    this.reload();
+    const len = this._prefix.length;
+
+    this.keys.forEach(key => {
+      const newKey = String(value) + key.slice(len);
+      const originValue = this.localStorage.getItem(key);
+      this.localStorage.removeItem(key);
+      /* istanbul ignore else */
+      if (originValue != null) this.localStorage.setItem(newKey, originValue);
+    });
+
     this._prefix = value;
     this.initKeys();
   }
 
   get size() {
-    this.initKeys();
+    this.reload();
     return this.keys.size;
   }
 
   private initKeys() {
     const keys = Object.keys(this.localStorage).filter(key => key.startsWith(this._prefix));
     this.keys = new List(keys);
+  }
+
+  /**
+   * 刷新
+   */
+  reload() {
+    this.initKeys();
     this.keys.forEach(k => this.handleExpired(k));
   }
 

@@ -10,12 +10,6 @@ describe('create', () => {
     expect(storage).toStrictEqual(expect.any(LightStorage));
     expect(storage.prefix).toBe(defaultPrefix);
   });
-
-  test('change prefix', () => {
-    const newPrefix = 'change prefix';
-    storage.prefix = newPrefix;
-    expect(storage.prefix).toBe(newPrefix);
-  });
 });
 
 /**
@@ -25,6 +19,34 @@ const PREFIX = 'test';
 const instance = new LightStorage(PREFIX);
 
 afterEach(() => window.localStorage.clear());
+
+describe('check prefix', () => {
+  test('get prefix', () => {
+    expect(instance.prefix).toBe(PREFIX);
+  });
+
+  describe('change prefix', () => {
+    const prefix = 'old-prefix';
+    const key = `${prefix}-change`;
+    const newPrefix = 'new-prefix';
+    const newKey = `${newPrefix}-change`;
+    const value = 'value';
+    const db = new LightStorage(prefix);
+
+    window.localStorage.setItem(key, value);
+
+    db.prefix = newPrefix;
+    expect(db.prefix).toBe(newPrefix);
+    expect(window.localStorage.getItem(key)).toBeNull();
+    expect(window.localStorage.getItem(newKey)).toBe(value);
+
+    test('use native removeItem', () => {
+      window.localStorage.removeItem(newKey);
+      db.prefix = prefix;
+      expect(window.localStorage.getItem(key)).toBeNull();
+    });
+  });
+});
 
 describe('get data', () => {
   const key = 'origin value';
@@ -46,20 +68,19 @@ describe('get data', () => {
   test('use native removeItem', () => {
     window.localStorage.removeItem(fullKey);
     expect(instance.get(key)).toBeUndefined();
-  })
+  });
 
   test('get unsafe data', () => {
     const unsafeData = '[{];<>';
     window.localStorage.setItem(fullKey, unsafeData);
     expect(instance.get(key)).toBe(unsafeData);
-  })
+  });
 
   test('get number-like', () => {
     const numberLike = '123456';
     window.localStorage.setItem(fullKey, numberLike);
     expect(instance.get(key)).toBe(Number(numberLike));
-  })
-
+  });
 });
 
 describe('check data', () => {
@@ -76,12 +97,11 @@ describe('check data', () => {
     const copyData = Object.keys(mockData).reduce((obj, key) => {
       const value = instance.get(key);
       expect(value).toStrictEqual(mockData[key]);
-      return { ...obj, [key]: instance.get(key) }
+      return { ...obj, [key]: instance.get(key) };
     }, {});
     expect(copyData).toStrictEqual(mockData);
   });
 });
-
 
 describe('check validity period', () => {
   const mockData = 'light-storage';
@@ -125,13 +145,13 @@ describe('has value', () => {
     expect(instance.has(key)).toBe(false);
     instance.set(key, '');
     expect(instance.has(key)).toBe(true);
-  })
+  });
 
   test('has maxAge', async () => {
     instance.set('maxAge', '', { maxAge: 5 });
     await delay(10);
     expect(instance.has('maxAge')).toBe(false);
-  })
+  });
 });
 
 describe('remove one', () => {
@@ -149,14 +169,14 @@ describe('remove one', () => {
 describe('cleanup', () => {
   instance.set('mock', true);
   instance.clear();
-  const keys = Object.keys(window.localStorage).filter(k => k.startsWith(PREFIX))
+  const keys = Object.keys(window.localStorage).filter(k => k.startsWith(PREFIX));
   expect(keys.length).toBe(0);
-})
+});
 
 describe('verify size', () => {
   beforeAll(() => {
     instance.clear();
-  })
+  });
 
   test('after cleanup', () => {
     expect(instance.size).toBe(0);
@@ -180,17 +200,17 @@ describe('verify size', () => {
     expect(db.size).toBe(1);
     window.localStorage.setItem(`${prefix}-b`, 'b');
     expect(db.size).toBe(2);
-  })
+  });
 
   test('has maxAge', async () => {
     instance.set('maxAge', '', { maxAge: 5 });
     await delay(10);
     expect(instance.size).toBe(0);
-  })
+  });
 
   test('same prefix', () => {
     instance.set('same prefix', '');
     const db = new LightStorage(PREFIX);
     expect(db.size).toEqual(instance.size);
-  })
-})
+  });
+});
