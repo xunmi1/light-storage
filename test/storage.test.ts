@@ -103,21 +103,24 @@ describe('check data', () => {
   });
 });
 
-describe('check validity period', () => {
+describe('check maxAge', () => {
   const mockData = 'light-storage';
 
   test('base time', async () => {
     const key = 'base';
     instance.set(key, mockData, { maxAge: 10 });
     expect(instance.get(key)).toBe(mockData);
+    expect(instance.getMaxAge(key)).toBe(10);
     await delay(15);
     expect(instance.get(key)).toBeUndefined();
+    expect(instance.getMaxAge(key)).toBeUndefined();
   });
 
   test('update maxAge', async () => {
     const key = 'maxAge';
     instance.set(key, mockData, { maxAge: 20 });
     instance.set(key, mockData, { maxAge: 10 });
+    expect(instance.getMaxAge(key)).toBe(10);
     await delay(15);
     expect(instance.get(key)).toBeUndefined();
   });
@@ -173,18 +176,20 @@ describe('cleanup', () => {
   expect(keys.length).toBe(0);
 });
 
-describe('verify size', () => {
+describe('verify size and keys', () => {
   beforeAll(() => {
     instance.clear();
   });
 
   test('after cleanup', () => {
     expect(instance.size).toBe(0);
+    expect(instance.keys).toStrictEqual([]);
   });
 
   test('size is one', () => {
     instance.set('verify size', '');
     expect(instance.size).toBe(1);
+    expect(instance.keys).toStrictEqual(['verify size']);
   });
 
   test('use native removeItem', () => {

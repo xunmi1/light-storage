@@ -1,17 +1,7 @@
 import { version } from '../package.json';
 import List from './list';
 import { isObject, isNumber, root } from './utils';
-
-interface LightStorageValue<T> {
-  value: T;
-  version: string;
-  maxAge?: number;
-  time?: number;
-}
-
-interface OriginValue<T> {
-  value?: T;
-}
+import { StorageValue } from './interfaces';
 
 /**
  * LightStorage
@@ -22,7 +12,7 @@ class LightStorage {
   static readonly version = version;
 
   private readonly localStorage: Storage;
-  private keys: List<string>;
+  private _keys: List<string>;
   private _prefix: string;
 
   constructor(prefix = 'light-storage') {
@@ -46,12 +36,12 @@ class LightStorage {
     this.reload();
     const len = this._prefix.length;
 
-    this.keys.forEach(key => {
+    this._keys.forEach(key => {
       const newKey = String(value) + key.slice(len);
-      const originValue = this.localStorage.getItem(key);
+      const StorageValue = this.localStorage.getItem(key);
       this.localStorage.removeItem(key);
       /* istanbul ignore else */
-      if (originValue != null) this.localStorage.setItem(newKey, originValue);
+      if (StorageValue != null) this.localStorage.setItem(newKey, StorageValue);
     });
 
     this._prefix = value;
@@ -60,16 +50,25 @@ class LightStorage {
 
   get size() {
     this.reload();
-    return this.keys.size;
+    return this._keys.size;
+  }
+
+  get keys() {
+    this.reload();
+    const keys: string[] = [];
+    const len = this._prefix.length;
+    // `-` occupied a character position
+    this._keys.forEach(k => keys.push(k.slice(len + 1)));
+    return keys;
   }
 
   private collectKeys() {
-    const keys = Object.keys(this.localStorage).filter(key => key.startsWith(this._prefix));
-    this.keys = new List(keys);
+    const _keys = Object.keys(this.localStorage).filter(key => key.startsWith(this._prefix));
+    this._keys = new List(_keys);
   }
 
-  private isFormSelf<T>(key: string, data: LightStorageValue<T> | OriginValue<T>): data is LightStorageValue<T> {
-    return this.keys.has(key) && (data as LightStorageValue<T>).version !== undefined;
+  private isFormSelf<T>(key: string, data: StorageValue<T>) {
+    return this._keys.has(key) && data.version !== undefined;
   }
 
   /**
@@ -77,17 +76,17 @@ class LightStorage {
    * @param key 键名
    * @returns {Object} 完整数据
    */
-  private getCompleteData<T>(key: string): LightStorageValue<T> | OriginValue<T> {
+  private getCompleteData<T>(key: string): StorageValue<T> {
     key = this.getCompleteKey(key);
     const origin = this.localStorage.getItem(key);
-    // if use `localStorage.removeItem`, remove keys
+    // if use `localStorage.removeItem`, remove _keys
     if (origin == null) {
-      this.keys.delete(key);
+      this._keys.delete(key);
       return { value: undefined };
     }
 
     try {
-      this.keys.add(key);
+      this._keys.add(key);
       const data = JSON.parse(origin);
       return isObject(data) ? data : { value: data };
     } catch {
@@ -118,7 +117,7 @@ class LightStorage {
     return data;
   }
 
-  private static isValid(data: LightStorageValue<unknown>) {
+  private static isValid(data: StorageValue<unknown>) {
     const { time, maxAge } = data;
     if (time && maxAge) {
       const age = Date.now() - time;
@@ -127,12 +126,9 @@ class LightStorage {
     return true;
   }
 
-  /**
-   * 刷新
-   */
   reload() {
     this.collectKeys();
-    this.keys.forEach(k => this.handleExpired(k));
+    this._keys.forEach(k => this.handleExpired(k));
   }
 
   /**
@@ -145,7 +141,7 @@ class LightStorage {
    */
   set<T = any>(key: string, value: T, options?: { maxAge?: number; update?: boolean }) {
     key = this.getCompleteKey(key);
-    const data: LightStorageValue<T> = { value, version: LightStorage.version };
+    const data: StorageValue<T> = { value, version: LightStorage.version };
     const { maxAge, update } = options ?? {};
     const now = Date.now();
     data.time = update ? now : this.getCreatedTime(key) ?? now;
@@ -157,7 +153,7 @@ class LightStorage {
       data.maxAge = maxAge;
     }
     this.localStorage.setItem(key, JSON.stringify(data));
-    this.keys.add(key);
+    this._keys.add(key);
   }
 
   /**
@@ -177,8 +173,11 @@ class LightStorage {
    * @returns 创建时间
    */
   getCreatedTime(key: string) {
-    const data = this.handleExpired(key);
-    if (data && this.isFormSelf(key, data)) return data.time;
+    return this.handleExpired(key)?.time;
+  }
+
+  getMaxAge(key: string) {
+    return this.handleExpired(key)?.maxAge;
   }
 
   /**
@@ -188,7 +187,7 @@ class LightStorage {
    */
   has(key: string) {
     key = this.getCompleteKey(key);
-    if (this.keys.has(key)) {
+    if (this._keys.has(key)) {
       return !!this.handleExpired(key);
     }
     return false;
@@ -202,14 +201,14 @@ class LightStorage {
   remove(key: string) {
     key = this.getCompleteKey(key);
     this.localStorage.removeItem(key);
-    return this.keys.delete(key);
+    return this._keys.delete(key);
   }
 
   /**
    * 清理全部数据
    */
   clear() {
-    this.keys.forEach(key => this.remove(key));
+    this._keys.forEach(key => this.remove(key));
   }
 }
 
