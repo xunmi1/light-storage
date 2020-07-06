@@ -1,6 +1,6 @@
 import { version } from '../package.json';
 import List from './list';
-import { isObject, isNumber } from './utils';
+import { isObject, isNumber, root } from './utils';
 
 interface LightStorageValue<T> {
   value: T;
@@ -26,8 +26,6 @@ class LightStorage {
   private _prefix: string;
 
   constructor(prefix = 'light-storage') {
-    /* istanbul ignore next */
-    const root = globalThis ?? self ?? window;
     if (root?.localStorage == null) {
       throw new Error('Current environment does not support localStorage');
     }
@@ -57,7 +55,7 @@ class LightStorage {
     });
 
     this._prefix = value;
-    this.initKeys();
+    this.collectKeys();
   }
 
   get size() {
@@ -65,17 +63,9 @@ class LightStorage {
     return this.keys.size;
   }
 
-  private initKeys() {
+  private collectKeys() {
     const keys = Object.keys(this.localStorage).filter(key => key.startsWith(this._prefix));
     this.keys = new List(keys);
-  }
-
-  /**
-   * 刷新
-   */
-  reload() {
-    this.initKeys();
-    this.keys.forEach(k => this.handleExpired(k));
   }
 
   private isFormSelf<T>(key: string, data: LightStorageValue<T> | OriginValue<T>): data is LightStorageValue<T> {
@@ -117,6 +107,17 @@ class LightStorage {
     return `${this._prefix}-${key}`;
   }
 
+  private handleExpired<T = any>(key: string) {
+    key = this.getCompleteKey(key);
+    const data = this.getCompleteData<T>(key);
+    if (this.isFormSelf(key, data) && !LightStorage.isValid(data)) {
+      this.remove(key);
+      return;
+    }
+
+    return data;
+  }
+
   private static isValid(data: LightStorageValue<unknown>) {
     const { time, maxAge } = data;
     if (time && maxAge) {
@@ -124,6 +125,14 @@ class LightStorage {
       return age >= 0 && age <= maxAge;
     }
     return true;
+  }
+
+  /**
+   * 刷新
+   */
+  reload() {
+    this.collectKeys();
+    this.keys.forEach(k => this.handleExpired(k));
   }
 
   /**
@@ -160,17 +169,6 @@ class LightStorage {
   get<T = any>(key: string, defaultValue?: T): T | undefined {
     const data = this.handleExpired(key);
     return data?.value === undefined ? defaultValue : data.value;
-  }
-
-  private handleExpired<T = any>(key: string) {
-    key = this.getCompleteKey(key);
-    const data = this.getCompleteData<T>(key);
-    if (this.isFormSelf(key, data) && !LightStorage.isValid(data)) {
-      this.remove(key);
-      return;
-    }
-
-    return data;
   }
 
   /**

@@ -4,5 +4,6 @@ module.exports = {
   coverageDirectory: 'coverage',
   collectCoverageFrom: [
     'src/**/*.{js,ts}',
+    '!src/list.ts'
   ],
 };

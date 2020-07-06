@@ -1,6 +1,15 @@
-class List<T = string> {
+import { root } from './utils';
+
+interface List<T = string> {
+  add(value: T): void;
+  delete(value: T): boolean;
+  forEach(func: (value: T) => void): void;
+  has(value: T): boolean;
+  readonly size: number;
+}
+
+class CustomSet<T> implements List<T> {
   private data: T[];
-  /* istanbul ignore next */
   constructor(list: T[] = []) {
     this.data = [...list];
   }
@@ -25,9 +34,10 @@ class List<T = string> {
     return this.data.includes(value);
   }
 
-  forEach(func: (value: T, index: number) => void) {
-    this.data.forEach((value, index) => func.call(this, value, index));
+  forEach(func: (value: T) => void) {
+    this.data.forEach(value => func.call(this, value));
   }
 }
 
+const List = root.Set ?? CustomSet;
 export default List;
