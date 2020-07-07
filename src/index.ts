@@ -2,8 +2,7 @@ import { version } from '../package.json';
 import { StorageValue } from './interfaces';
 import StorageItem from './storage.item';
 import List from './list';
-import { isObject, isNumber, root } from './utils';
-import { StorageValue } from './interfaces';
+import { isObject, isNumber, startsWith } from './utils';
 
 /**
  * LightStorage
@@ -18,10 +17,7 @@ class LightStorage {
   private _prefix: string;
 
   constructor(prefix = 'light-storage') {
-    if (root?.localStorage == null) {
-      throw new Error('Current environment does not support localStorage');
-    }
-    this.localStorage = root.localStorage;
+    this.localStorage = window.localStorage;
     this._prefix = prefix;
     this.reload();
   }
@@ -65,7 +61,7 @@ class LightStorage {
   }
 
   private collectKeys() {
-    const _keys = Object.keys(this.localStorage).filter(key => key.startsWith(this._prefix));
+    const _keys = Object.keys(this.localStorage).filter(key => startsWith(key, this._prefix));
     this._keys = new List(_keys);
   }
 
@@ -78,13 +74,13 @@ class LightStorage {
    * @param key 键名
    * @returns {Object} 完整数据
    */
-  private getCompleteData<T>(key: string): StorageValue<T> {
+  private getCompleteData<T>(key: string): StorageValue<T> | undefined {
     key = this.getCompleteKey(key);
     const origin = this.localStorage.getItem(key);
     // if use `localStorage.removeItem`, remove _keys
     if (origin == null) {
       this._keys.delete(key);
-      return { value: undefined };
+      return;
     }
 
     try {
@@ -102,24 +98,21 @@ class LightStorage {
    * @return 实际键名
    */
   private getCompleteKey(key: string) {
-    if (key.startsWith(this._prefix)) {
-      return key;
-    }
+    if (startsWith(key, this._prefix)) return key;
     return `${this._prefix}-${key}`;
   }
 
   private handleExpired<T = any>(key: string) {
-    key = this.getCompleteKey(key);
     const data = this.getCompleteData<T>(key);
-    if (this.isFormSelf(key, data) && !LightStorage.isValid(data)) {
-      this.remove(key);
-      return;
-    }
+    if (data && this.isValid(key, data)) return data;
 
-    return data;
+    this.remove(key);
+    return;
   }
 
-  private static isValid(data: StorageValue<unknown>) {
+  private isValid(key: string, data: StorageValue<unknown>) {
+    key = this.getCompleteKey(key);
+    if (!this.isFormSelf(key, data)) return true;
     const { time, maxAge } = data;
     if (time && maxAge) {
       const age = Date.now() - time;
@@ -146,10 +139,10 @@ class LightStorage {
    * @param [options.update=false] 是否更新创建时间
    */
   set<T = any>(key: string, value: T, options?: { maxAge?: number; update?: boolean }) {
+    const now = Date.now();
     key = this.getCompleteKey(key);
     const data: StorageValue<T> = { value, version: LightStorage.version };
     const { maxAge, update } = options ?? {};
-    const now = Date.now();
     data.time = update ? now : this.getCreatedTime(key) ?? now;
 
     if (maxAge) {

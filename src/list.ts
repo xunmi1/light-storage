@@ -1,5 +1,3 @@
-import { root } from './utils';
-
 interface List<T = string> {
   add(value: T): void;
   delete(value: T): boolean;
@@ -31,7 +29,7 @@ class CustomSet<T> implements List<T> {
   }
 
   has(value: T) {
-    return this.data.includes(value);
+    return this.data.indexOf(value) > -1;
   }
 
   forEach(func: (value: T) => void) {
@@ -39,5 +37,5 @@ class CustomSet<T> implements List<T> {
   }
 }
 
-const List = root.Set ?? CustomSet;
+const List = window.Set ?? CustomSet;
 export default List;
