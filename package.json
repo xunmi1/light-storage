@@ -1,6 +1,6 @@
 {
   "name": "light-storage",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "description": "A lightweight tool for handing localStorage.",
   "main": "dist/light-storage.umd.js",
   "module": "dist/light-storage.esm.js",
@@ -8,7 +8,7 @@
   "files": ["dist"],
   "scripts": {
     "build": "npm run build-ts && npm run build-rollup && npm run build-dts && rimraf .cache",
-    "build-ts": "rimraf types && tsc -p tsconfig.json --outDir .cache",
+    "build-ts": "rimraf .cache && tsc -p tsconfig.json --outDir .cache",
     "build-rollup": "rimraf dist && rollup -c scripts/rollup.config.js  -i .cache/src/index.js",
     "build-dts": "api-extractor run --local",
     "lint": "prettier --write --parser typescript \"src/**/*.ts\"",

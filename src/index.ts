@@ -1,4 +1,6 @@
 import { version } from '../package.json';
+import { StorageValue } from './interfaces';
+import StorageItem from './storage.item';
 import List from './list';
 import { isObject, isNumber, root } from './utils';
 import { StorageValue } from './interfaces';
@@ -129,6 +131,10 @@ class LightStorage {
   reload() {
     this.collectKeys();
     this._keys.forEach(k => this.handleExpired(k));
+  }
+
+  select<T>(key: string) {
+    return new StorageItem<T>(this, key);
   }
 
   /**
