@@ -24,8 +24,8 @@ class StorageItem<T> {
   }
 
   setValue(value: T) {
-    this.storage.set(this.key, value);
-    this.data = { value };
+    this.storage.set(this.key, value, { maxAge: this.maxAge, update: false });
+    this.data.value = value;
     return this.context;
   }
 

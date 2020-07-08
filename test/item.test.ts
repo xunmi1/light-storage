@@ -62,4 +62,10 @@ describe('check all setters', () => {
     expect(handler).not.toThrowError(Error);
     expect(storageItem.value).toBe(getItem(key).value);
   })
+
+  test('set value is not clear maxAge', () => {
+    storageItem.setMaxAge(100).setValue('');
+    expect(storageItem.maxAge).toBe(100);
+  });
+
 })
