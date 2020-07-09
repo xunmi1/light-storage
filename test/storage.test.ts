@@ -160,12 +160,8 @@ describe('has value', () => {
 describe('remove one', () => {
   test('remove one', () => {
     instance.set('mock', true, { maxAge: 20 });
-    expect(instance.remove('mock')).toBe(true);
+    instance.remove('mock');
     expect(instance.get('mock')).toBeUndefined();
-  });
-
-  test('remove undefined key', () => {
-    expect(instance.remove('undefined-mock')).toBe(false);
   });
 });
 
@@ -176,46 +172,45 @@ describe('cleanup', () => {
   expect(keys.length).toBe(0);
 });
 
-describe('verify size and keys', () => {
+describe('verify keys', () => {
   beforeAll(() => {
     instance.clear();
   });
 
   test('after cleanup', () => {
-    expect(instance.size).toBe(0);
     expect(instance.keys).toStrictEqual([]);
   });
 
   test('size is one', () => {
-    instance.set('verify size', '');
-    expect(instance.size).toBe(1);
-    expect(instance.keys).toStrictEqual(['verify size']);
+    instance.set('verify keys', '');
+    expect(instance.keys).toStrictEqual(['verify keys']);
   });
 
   test('use native removeItem', () => {
-    instance.set('verify size', '');
-    window.localStorage.removeItem(`${PREFIX}-verify size`);
-    expect(instance.size).toBe(0);
+    instance.set('verify keys', '');
+    window.localStorage.removeItem(`${PREFIX}-verify keys`);
+    expect(instance.keys).toStrictEqual([]);
   });
 
   test('size of new instance', () => {
     const prefix = 'new-instance-size';
     window.localStorage.setItem(`${prefix}-a`, 'a');
     const db = new LightStorage(prefix);
-    expect(db.size).toBe(1);
+    expect(db.keys).toStrictEqual(['a']);
+    window.localStorage.removeItem(`${prefix}-a`);
     window.localStorage.setItem(`${prefix}-b`, 'b');
-    expect(db.size).toBe(2);
+    expect(db.keys).toStrictEqual(['b']);
   });
 
   test('has maxAge', async () => {
     instance.set('maxAge', '', { maxAge: 5 });
     await delay(10);
-    expect(instance.size).toBe(0);
+    expect(instance.keys).toStrictEqual([]);
   });
 
   test('same prefix', () => {
     instance.set('same prefix', '');
     const db = new LightStorage(PREFIX);
-    expect(db.size).toEqual(instance.size);
+    expect(db.keys).toStrictEqual(instance.keys);
   });
 });

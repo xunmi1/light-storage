@@ -1,35 +1,37 @@
 import { version } from '../package.json';
-import { StorageValue } from './interfaces';
-import StorageItem from './storage.item';
+import { StorageValue, setOptions } from './interfaces';
+import LightStorageItem from './storage.item';
 import List from './list';
 import { isObject, isNumber, startsWith } from './utils';
 
 /**
  * LightStorage
- * @param prefix - 自定义前缀
- * @author xunmi <xunmi1@outlook.com>
+ * @public
  */
 class LightStorage {
   static readonly version = version;
+  static readonly Item = LightStorageItem;
 
   private readonly localStorage: Storage;
   private _keys: List<string>;
   private _prefix: string;
 
+  /**
+   * @param prefix - Custom prefix of Storage
+   */
   constructor(prefix = 'light-storage') {
     this.localStorage = window.localStorage;
     this._prefix = prefix;
     this.reload();
   }
 
+  /**
+   * Get or set the current prefix
+   */
   get prefix() {
     return this._prefix;
   }
 
-  /**
-   * Modify prefix
-   * @param value
-   */
   set prefix(value: string) {
     this.reload();
     const len = this._prefix.length;
@@ -46,11 +48,9 @@ class LightStorage {
     this.collectKeys();
   }
 
-  get size() {
-    this.reload();
-    return this._keys.size;
-  }
-
+  /**
+   * Get all keys currently present
+   */
   get keys() {
     this.reload();
     const keys: string[] = [];
@@ -69,11 +69,6 @@ class LightStorage {
     return this._keys.has(key) && data.version !== undefined;
   }
 
-  /**
-   * 获取完整数据
-   * @param key 键名
-   * @returns {Object} 完整数据
-   */
   private getCompleteData<T>(key: string): StorageValue<T> | undefined {
     key = this.getCompleteKey(key);
     const origin = this.localStorage.getItem(key);
@@ -92,16 +87,12 @@ class LightStorage {
     }
   }
 
-  /**
-   * 获取实际键名
-   * @param key 查询键名
-   * @return 实际键名
-   */
   private getCompleteKey(key: string) {
     if (startsWith(key, this._prefix)) return key;
     return `${this._prefix}-${key}`;
   }
 
+  /** @internal  */
   private handleExpired<T = any>(key: string) {
     const data = this.getCompleteData<T>(key);
     if (data && this.isValid(key, data)) return data;
@@ -121,24 +112,23 @@ class LightStorage {
     return true;
   }
 
+  /**
+   * Synchronize data in the localStorage, and check validity
+   * @remarks use for localStorage is used directly, and it does not meet expectations
+   */
   reload() {
     this.collectKeys();
     this._keys.forEach(k => this.handleExpired(k));
   }
 
-  select<T>(key: string) {
-    return new StorageItem<T>(this, key);
-  }
-
   /**
-   * 添加数据
-   * @param key 键名，在内部会转换
-   * @param value 键值
-   * @param options
-   * @param [options.maxAge] 有效期
-   * @param [options.update=false] 是否更新创建时间
+   * Set the value with the given key, creating a new value if none existed
+   * Note: calling will reset the original storage
+   * @param key - Key name
+   * @param value - Data to be stored
+   * @param options - Options
    */
-  set<T = any>(key: string, value: T, options?: { maxAge?: number; update?: boolean }) {
+  set<T = any>(key: string, value: T, options?: setOptions) {
     const now = Date.now();
     key = this.getCompleteKey(key);
     const data: StorageValue<T> = { value, version: LightStorage.version };
@@ -156,10 +146,9 @@ class LightStorage {
   }
 
   /**
-   * 访问数据
-   * @param key 键名
-   * @param [defaultValue] 默认值
-   * @returns 键值，若过期，则自动删除，返回默认值
+   * Return the current value associated with the given key, or undefined if the given key does not exist.
+   * @param key - Key name
+   * @param defaultValue - Return the default value if the given key does not exist
    */
   get<T = any>(key: string, defaultValue?: T): T | undefined {
     const data = this.handleExpired(key);
@@ -167,22 +156,21 @@ class LightStorage {
   }
 
   /**
-   * 获取创建时间
-   * @param key 键名
-   * @returns 创建时间
+   * Return the created time associated with the given key
    */
   getCreatedTime(key: string) {
     return this.handleExpired(key)?.time;
   }
 
+  /**
+   * Return the `maxAge` associated with the given key
+   */
   getMaxAge(key: string) {
     return this.handleExpired(key)?.maxAge;
   }
 
   /**
-   * 判断是否含有该 key
-   * @param key - 数据键名
-   * @return {boolean}
+   * Whether it contains the key
    */
   has(key: string) {
     key = this.getCompleteKey(key);
@@ -193,21 +181,27 @@ class LightStorage {
   }
 
   /**
-   * 移除指定数据
-   * @param key - 数据键名
-   * @return {boolean}
+   * Remove the data with the given key
    */
   remove(key: string) {
     key = this.getCompleteKey(key);
     this.localStorage.removeItem(key);
-    return this._keys.delete(key);
+    this._keys.delete(key);
   }
 
   /**
-   * 清理全部数据
+   * Clear all data with the current prefix
    */
   clear() {
     this._keys.forEach(key => this.remove(key));
+  }
+
+  /**
+   * Generate an instance with the given key
+   * @param key - the given key
+   */
+  select<T>(key: string) {
+    return new LightStorage.Item<T>(this, key);
   }
 }
 
