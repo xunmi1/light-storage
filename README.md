@@ -17,9 +17,9 @@ A lightweight tool for handing localStorage.
 
 #### NPM
 ```bash
-npm install light-print
+npm install light-storage
 # or
-yarn add light-print
+yarn add light-storage
 ```
 ```js
 import LightStorage from 'light-storage';
@@ -67,13 +67,13 @@ import LightStorage from 'light-storage';
      ```
 
 3. Get data
+>  Note: return `undefined` if none existed
 
    - Get the current value associated with the given key.
 
      ```js
      storage.get('key');
      ```
-     >  Note: return `undefined` if none existed
      
    - Using call chaining.
 
