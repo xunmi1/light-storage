@@ -5,7 +5,7 @@ const PREFIX = 'test';
 const instance = new LightStorage(PREFIX);
 const getItem = (key: string) => {
   const data = window.localStorage.getItem(`${PREFIX}-${key}`);
-  return JSON.parse(data as string);
+  return data ? JSON.parse(data as string) : { value: undefined };
 }
 
 describe('use select', () => {
@@ -56,6 +56,12 @@ describe('check all setters', () => {
     storageItem.update();
     expect(storageItem.time).toBe(getItem(key).time);
   });
+
+  test('remove', () => {
+    storageItem.remove();
+    expect(storageItem.value).toBeUndefined();
+    expect(getItem(key).value).toBeUndefined();
+  })
 
   test('chain call', () => {
     const handler = () => storageItem.setValue('').setMaxAge(2).update().setValue(1);

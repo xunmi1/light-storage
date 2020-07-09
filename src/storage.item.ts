@@ -51,6 +51,15 @@ class LightStorageItem<T> {
     this.data.time = this.storage.getCreatedTime(this.key);
     return this.context;
   }
+
+  /**
+   * Remove oneself
+   */
+  remove() {
+    this.storage.remove(this.key);
+    this.data = {};
+    return this.context;
+  }
 }
 
 export default LightStorageItem;
