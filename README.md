@@ -67,7 +67,8 @@ import LightStorage from 'light-storage';
      ```
 
 3. Get data
->  Note: return `undefined` if none existed
+
+   >  Note: return `undefined` if none existed
 
    - Get the current value associated with the given key.
 

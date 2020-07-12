@@ -1,4 +1,4 @@
-interface List<T = string> {
+interface List<T> {
   add(value: T): void;
   delete(value: T): boolean;
   forEach(func: (value: T) => void): void;

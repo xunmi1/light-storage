@@ -7,7 +7,7 @@ export interface StorageValue<T> {
 }
 
 /** @public */
-export interface setOptions {
+export interface SetOptions {
   /**
    * Effective duration (millisecond)，and must be a non-negative number
    */

@@ -1,5 +1,5 @@
 import { version } from '../package.json';
-import { StorageValue, setOptions } from './interfaces';
+import { StorageValue, SetOptions } from './interfaces';
 import LightStorageItem from './storage.item';
 import List from './list';
 import { isObject, isNumber, startsWith } from './utils';
@@ -128,7 +128,7 @@ class LightStorage {
    * @param value - Data to be stored
    * @param options - Options
    */
-  set<T = any>(key: string, value: T, options?: setOptions) {
+  set<T = any>(key: string, value: T, options?: SetOptions) {
     const now = Date.now();
     key = this.getCompleteKey(key);
     const data: StorageValue<T> = { value, version: LightStorage.version };

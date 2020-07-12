@@ -12,10 +12,6 @@ describe('use select', () => {
   test('created instance of `StorageItem`', () => {
     expect(instance.select('a')).toStrictEqual(expect.any(StorageItem));
   });
-
-  test('select undef key', () => {
-    expect(instance.select('undef'));
-  })
 })
 
 describe('check all getters', () => {
@@ -69,7 +65,7 @@ describe('check all setters', () => {
     expect(storageItem.value).toBe(getItem(key).value);
   })
 
-  test('set value is not clear maxAge', () => {
+  test('set value and not clear maxAge', () => {
     storageItem.setMaxAge(100).setValue('');
     expect(storageItem.maxAge).toBe(100);
   });
