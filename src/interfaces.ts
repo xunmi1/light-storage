@@ -17,3 +17,7 @@ export interface SetOptions {
    */
   update?: boolean;
 }
+
+export interface Observer {
+  (value: unknown, options?: SetOptions): void;
+}

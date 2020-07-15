@@ -5,7 +5,9 @@
   "main": "dist/light-storage.umd.js",
   "module": "dist/light-storage.esm.js",
   "types": "dist/light-storage.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "npm run build-ts && npm run build-rollup && npm run build-dts && rimraf .cache",
     "build-ts": "rimraf .cache && tsc -p tsconfig.json --outDir .cache",
@@ -37,6 +39,7 @@
     "@microsoft/api-extractor": "^7.8.15",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^8.1.0",
+    "@xunmi/event-channel": "^1.0.0",
     "@xunmi/prettier-config": "^1.0.1",
     "babel-jest": "^26.1.0",
     "prettier": "^2.0.5",

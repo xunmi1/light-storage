@@ -1,25 +1,26 @@
 import { version } from '../package.json';
 import { StorageValue, SetOptions } from './interfaces';
+import { isObject, isNumber, startsWith } from './utils';
 import LightStorageItem from './storage.item';
 import List from './list';
-import { isObject, isNumber, startsWith } from './utils';
+import { Subject } from './subject';
 
 /**
  * LightStorage
  * @public
  */
-class LightStorage {
+class LightStorage extends Subject {
   static readonly version = version;
   static readonly Item = LightStorageItem;
 
   private readonly localStorage: Storage;
   private _keys: List<string>;
   private _prefix: string;
-
   /**
    * @param prefix - Custom prefix of Storage
    */
   constructor(prefix = 'light-storage') {
+    super();
     this.localStorage = window.localStorage;
     this._prefix = prefix;
     this.reload();
@@ -54,9 +55,7 @@ class LightStorage {
   get keys() {
     this.reload();
     const keys: string[] = [];
-    const len = this._prefix.length;
-    // `-` occupied a character position
-    this._keys.forEach(k => keys.push(k.slice(len + 1)));
+    this._keys.forEach(k => keys.push(this.getSimplifyKey(k)));
     return keys;
   }
 
@@ -72,7 +71,7 @@ class LightStorage {
   private getCompleteData<T>(key: string): StorageValue<T> | undefined {
     key = this.getCompleteKey(key);
     const origin = this.localStorage.getItem(key);
-    // if use `localStorage.removeItem`, remove _keys
+    // if use `localStorage.removeItem`, remove the key
     if (origin == null) {
       this._keys.delete(key);
       return;
@@ -90,6 +89,10 @@ class LightStorage {
   private getCompleteKey(key: string) {
     if (startsWith(key, this._prefix)) return key;
     return `${this._prefix}-${key}`;
+  }
+
+  private getSimplifyKey(key: string) {
+    return key.slice(this._prefix.length + 1);
   }
 
   /** @internal  */
@@ -143,6 +146,9 @@ class LightStorage {
     }
     this.localStorage.setItem(key, JSON.stringify(data));
     this._keys.add(key);
+
+    // notice `set` handler
+    this.notify(this.getSimplifyKey(key), value);
   }
 
   /**
@@ -187,6 +193,7 @@ class LightStorage {
     key = this.getCompleteKey(key);
     this.localStorage.removeItem(key);
     this._keys.delete(key);
+    this.notify(this.getSimplifyKey(key), undefined);
   }
 
   /**

@@ -1,14 +1,16 @@
 import { StorageValue } from './interfaces';
+import { SubjectItem } from './subject';
 import LightStorage from './index';
 
-class LightStorageItem<T> {
-  private readonly context: LightStorageItem<T>;
+class LightStorageItem<T> extends SubjectItem<LightStorage> {
+  protected readonly context: this;
   private data: StorageValue<T>;
 
-  constructor(private readonly storage: LightStorage, private readonly key: string) {
+  constructor(protected readonly instance: LightStorage, protected readonly key: string) {
+    super();
     this.context = this;
-    //@ts-ignore
-    this.data = this.storage.handleExpired<T>(this.key) ?? {};
+    // @ts-ignore
+    this.data = this.instance.handleExpired<T>(this.key) ?? {};
   }
 
   get value() {
@@ -32,13 +34,13 @@ class LightStorageItem<T> {
    * @param value
    */
   setValue(value: T) {
-    this.storage.set(this.key, value, { maxAge: this.maxAge, update: false });
+    this.instance.set(this.key, value, { maxAge: this.maxAge, update: false });
     this.data.value = value;
     return this.context;
   }
 
   setMaxAge(maxAge: number) {
-    this.storage.set(this.key, this.value, { maxAge, update: false });
+    this.instance.set(this.key, this.value, { maxAge, update: false });
     this.data.maxAge = maxAge;
     return this.context;
   }
@@ -47,8 +49,8 @@ class LightStorageItem<T> {
    * Update creation time
    */
   update() {
-    this.storage.set(this.key, this.value, { maxAge: this.maxAge, update: true });
-    this.data.time = this.storage.getCreatedTime(this.key);
+    this.instance.set(this.key, this.value, { maxAge: this.maxAge, update: true });
+    this.data.time = this.instance.getCreatedTime(this.key);
     return this.context;
   }
 
@@ -56,7 +58,7 @@ class LightStorageItem<T> {
    * Remove oneself
    */
   remove() {
-    this.storage.remove(this.key);
+    this.instance.remove(this.key);
     this.data = {};
     return this.context;
   }
