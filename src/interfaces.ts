@@ -19,5 +19,5 @@ export interface SetOptions {
 }
 
 export interface Observer {
-  (value: unknown, options?: SetOptions): void;
+  (value: unknown): void;
 }
