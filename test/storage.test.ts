@@ -1,6 +1,5 @@
 import LightStorage from '../src';
-
-const delay = (timeout: number) => new Promise(resolve => setTimeout(resolve, timeout));
+import { delay } from './utils';
 
 describe('create', () => {
   const defaultPrefix = 'light-storage';

@@ -1,4 +1,7 @@
 import LightStorage from '../src';
+import { toBeWithinRange } from './utils';
+
+expect.extend({ toBeWithinRange });
 
 const storage = new LightStorage('test');
 
@@ -44,7 +47,7 @@ describe('instance watch', () => {
           break;
         case 3:
           expect(value).toBeUndefined();
-          expect(Date.now() - time).toBeGreaterThanOrEqual(maxAge);
+          expect(Date.now() - time).toBeWithinRange(maxAge - 3, maxAge + 3);
           done();
       }
     }
