@@ -16,6 +16,7 @@ class LightStorage extends Subject {
   private readonly localStorage: Storage;
   private _keys: List<string>;
   private _prefix: string;
+  private readonly timers: { [key: string]: number | undefined };
   /**
    * @param prefix - Custom prefix of Storage
    */
@@ -23,6 +24,7 @@ class LightStorage extends Subject {
     super();
     this.localStorage = window.localStorage;
     this._prefix = prefix;
+    this.timers = Object.create(null);
     this.reload();
   }
 
@@ -97,22 +99,42 @@ class LightStorage extends Subject {
 
   /** @internal  */
   private handleExpired<T = any>(key: string) {
+    key = this.getCompleteKey(key);
     const data = this.getCompleteData<T>(key);
-    if (data && this.isValid(key, data)) return data;
 
+    if (data) {
+      if (!this.isFormSelf(key, data)) return data;
+      const { time, maxAge } = data;
+      if (!(time && maxAge)) return data;
+      if (LightStorage.isValid(time, maxAge)) {
+        this.abortTimer(key);
+        this.startTimer(key, time, maxAge);
+        return data;
+      }
+    }
     this.remove(key);
     return;
   }
 
-  private isValid(key: string, data: StorageValue<unknown>) {
-    key = this.getCompleteKey(key);
-    if (!this.isFormSelf(key, data)) return true;
-    const { time, maxAge } = data;
-    if (time && maxAge) {
-      const age = Date.now() - time;
-      return age >= 0 && age <= maxAge;
-    }
-    return true;
+  /**
+   * use timer for expiration
+   * @param key
+   * @param time
+   * @param maxAge
+   */
+  private startTimer( key: string, time: number, maxAge: number) {
+    const remaining = time + maxAge - Date.now();
+    this.timers[key] = window.setTimeout(() => this.remove(key), remaining);
+  }
+
+  private abortTimer(key: string) {
+    if (this.timers[key]) window.clearTimeout(this.timers[key]);
+    this.timers[key]= undefined;
+  }
+
+  private static isValid(time: number, maxAge: number): boolean {
+    const age = Date.now() - time;
+    return age >= 0 && age <= maxAge;
   }
 
   /**
@@ -138,11 +160,14 @@ class LightStorage extends Subject {
     const { maxAge, update } = options ?? {};
     data.time = update ? now : this.getCreatedTime(key) ?? now;
 
+    this.abortTimer(key);
+
     if (maxAge) {
       if (!isNumber(maxAge) || maxAge < 0) {
         throw new TypeError('maxAge is invalid, and must be a non-negative number');
       }
       data.maxAge = maxAge;
+      this.startTimer(key, data.time, maxAge);
     }
     this.localStorage.setItem(key, JSON.stringify(data));
     this._keys.add(key);
@@ -191,6 +216,7 @@ class LightStorage extends Subject {
    */
   remove(key: string) {
     key = this.getCompleteKey(key);
+    this.abortTimer(key);
     this.localStorage.removeItem(key);
     this._keys.delete(key);
     this.notify(this.getSimplifyKey(key), undefined);
