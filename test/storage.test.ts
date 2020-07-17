@@ -136,6 +136,15 @@ describe('check maxAge', () => {
     expect(instance.get(key)).toBeUndefined();
   });
 
+  test('set maxAge with native setItem', async () => {
+    const key = 'maxAge-with-native';
+    const origin = { value: mockData, time: Date.now(), maxAge: 8, version: '*' };
+    window.localStorage.setItem(`${PREFIX}-${key}`, JSON.stringify(origin));
+    await delay(10);
+    expect(instance.get(key)).toBeUndefined();
+
+  });
+
   test('error time', () => {
     const trigger = () => instance.set('mock', mockData, { maxAge: -1 });
     expect(trigger).toThrowError(TypeError);
