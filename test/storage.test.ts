@@ -49,13 +49,13 @@ describe('check prefix', () => {
 
 describe('get data', () => {
   const key = 'origin value';
-  const fullKey = `${PREFIX}-${key}`;
+  const originKey = `${PREFIX}-${key}`;
   const origin = JSON.stringify({ value: true });
 
   test('get origin value', () => {
-    window.localStorage.setItem(fullKey, origin);
+    window.localStorage.setItem(originKey, origin);
     expect(instance.get(key)).toBe(true);
-    expect(instance.get(fullKey)).toBe(true);
+    expect(instance.get(originKey)).toBe(true);
   });
 
   test('get default value', () => {
@@ -65,19 +65,19 @@ describe('get data', () => {
   });
 
   test('use native removeItem', () => {
-    window.localStorage.removeItem(fullKey);
+    window.localStorage.removeItem(originKey);
     expect(instance.get(key)).toBeUndefined();
   });
 
   test('get unsafe data', () => {
     const unsafeData = '[{];<>';
-    window.localStorage.setItem(fullKey, unsafeData);
+    window.localStorage.setItem(originKey, unsafeData);
     expect(instance.get(key)).toBe(unsafeData);
   });
 
   test('get number-like', () => {
     const numberLike = '123456';
-    window.localStorage.setItem(fullKey, numberLike);
+    window.localStorage.setItem(originKey, numberLike);
     expect(instance.get(key)).toBe(Number(numberLike));
   });
 });
@@ -137,11 +137,14 @@ describe('check maxAge', () => {
 
   test('set maxAge with native setItem', async () => {
     const key = 'maxAge-with-native';
-    const origin = { value: mockData, time: Date.now(), maxAge: 8, version: '*' };
-    window.localStorage.setItem(`${PREFIX}-${key}`, JSON.stringify(origin));
-    await delay(10);
+    const originKey = `${PREFIX}-${key}`;
+    const time = Date.now();
+    const setItem = (data: any) => window.localStorage.setItem(originKey, JSON.stringify(data));
+    setItem({ value: '', time, maxAge: 20, version: '*' });
+    expect(instance.get(key)).toBe('');
+    setItem({ value: '', time, maxAge: 10, version: '*' });
+    await delay(15);
     expect(instance.get(key)).toBeUndefined();
-
   });
 
   test('error time', () => {

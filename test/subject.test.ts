@@ -24,7 +24,7 @@ describe('instance watch', () => {
           done(new Error());
           break;
       }
-    }
+    };
     storage.watch('key', observer);
     storage.set('key', val);
 
@@ -50,12 +50,11 @@ describe('instance watch', () => {
           expect(Date.now() - time).toBeWithinRange(maxAge - 3, maxAge + 3);
           done();
       }
-    }
+    };
     storage.watch(key, observer);
     storage.set(key, val, { maxAge });
-  })
+  });
 });
-
 
 describe('instance item watch', () => {
   const storageItem = storage.select('item');
@@ -78,7 +77,7 @@ describe('instance item watch', () => {
           done(new Error());
           break;
       }
-    }
+    };
     storageItem.watch(observer);
     storageItem.setValue(val);
 

@@ -16,6 +16,7 @@ class LightStorage extends Subject {
   private readonly localStorage: Storage;
   private _keys: List<string>;
   private _prefix: string;
+  /** save all timer */
   private readonly timers: { [key: string]: number | undefined };
   /**
    * @param prefix - Custom prefix of Storage
@@ -41,10 +42,10 @@ class LightStorage extends Subject {
 
     this._keys.forEach(key => {
       const newKey = String(value) + key.slice(len);
-      const StorageValue = this.localStorage.getItem(key);
+      const origin = this.localStorage.getItem(key);
       this.localStorage.removeItem(key);
       /* istanbul ignore else */
-      if (StorageValue != null) this.localStorage.setItem(newKey, StorageValue);
+      if (origin != null) this.localStorage.setItem(newKey, origin);
     });
 
     this._prefix = value;
@@ -71,7 +72,6 @@ class LightStorage extends Subject {
   }
 
   private getCompleteData<T>(key: string): StorageValue<T> | undefined {
-    key = this.getCompleteKey(key);
     const origin = this.localStorage.getItem(key);
     // if use `localStorage.removeItem`, remove the key
     if (origin == null) {
@@ -107,8 +107,7 @@ class LightStorage extends Subject {
       const { time, maxAge } = data;
       if (!(time && maxAge)) return data;
       if (LightStorage.isValid(time, maxAge)) {
-        this.abortTimer(key);
-        this.startTimer(key, time, maxAge);
+        if (!this.timers[key]) this.startTimer(key, time, maxAge);
         return data;
       }
     }
@@ -122,14 +121,14 @@ class LightStorage extends Subject {
    * @param time
    * @param maxAge
    */
-  private startTimer( key: string, time: number, maxAge: number) {
+  private startTimer(key: string, time: number, maxAge: number) {
     const remaining = time + maxAge - Date.now();
     this.timers[key] = window.setTimeout(() => this.remove(key), remaining);
   }
 
   private abortTimer(key: string) {
     if (this.timers[key]) window.clearTimeout(this.timers[key]);
-    this.timers[key]= undefined;
+    this.timers[key] = undefined;
   }
 
   private static isValid(time: number, maxAge: number): boolean {
@@ -154,10 +153,10 @@ class LightStorage extends Subject {
    * @param options - Options
    */
   set<T = any>(key: string, value: T, options?: SetOptions) {
-    const now = Date.now();
     key = this.getCompleteKey(key);
     const data: StorageValue<T> = { value, version: LightStorage.version };
     const { maxAge, update } = options ?? {};
+    const now = Date.now();
     data.time = update ? now : this.getCreatedTime(key) ?? now;
 
     this.abortTimer(key);
@@ -169,6 +168,7 @@ class LightStorage extends Subject {
       data.maxAge = maxAge;
       this.startTimer(key, data.time, maxAge);
     }
+
     this.localStorage.setItem(key, JSON.stringify(data));
     this._keys.add(key);
 
@@ -226,7 +226,13 @@ class LightStorage extends Subject {
    * Clear all data with the current prefix
    */
   clear() {
-    this._keys.forEach(key => this.remove(key));
+    this._keys.forEach(key => {
+      this.abortTimer(key);
+      this.localStorage.removeItem(key);
+      this.notify(this.getSimplifyKey(key), undefined);
+    });
+
+    this._keys.clear();
   }
 
   /**

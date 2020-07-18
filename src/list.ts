@@ -1,6 +1,7 @@
 interface List<T> {
   add(value: T): void;
   delete(value: T): boolean;
+  clear(): void;
   forEach(func: (value: T) => void): void;
   has(value: T): boolean;
   readonly size: number;
@@ -26,6 +27,10 @@ class CustomSet<T> implements List<T> {
     if (index < 0) return false;
     this.data.splice(index, 1);
     return true;
+  }
+
+  clear() {
+    this.data = [];
   }
 
   has(value: T) {

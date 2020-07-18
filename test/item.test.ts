@@ -6,13 +6,13 @@ const instance = new LightStorage(PREFIX);
 const getItem = (key: string) => {
   const data = window.localStorage.getItem(`${PREFIX}-${key}`);
   return data ? JSON.parse(data as string) : { value: undefined };
-}
+};
 
 describe('use select', () => {
   test('created instance of `StorageItem`', () => {
     expect(instance.select('a')).toStrictEqual(expect.any(StorageItem));
   });
-})
+});
 
 describe('check all getters', () => {
   const key = 'getter';
@@ -32,7 +32,7 @@ describe('check all getters', () => {
   test('get time', () => {
     expect(storageItem.time).toBe(getItem(key).time);
   });
-})
+});
 
 describe('check all setters', () => {
   const key = 'setters';
@@ -44,7 +44,7 @@ describe('check all setters', () => {
   });
 
   test('set maxAge', () => {
-    storageItem.setMaxAge(10)
+    storageItem.setMaxAge(10);
     expect(storageItem.maxAge).toBe(10);
   });
 
@@ -57,17 +57,16 @@ describe('check all setters', () => {
     storageItem.remove();
     expect(storageItem.value).toBeUndefined();
     expect(getItem(key).value).toBeUndefined();
-  })
+  });
 
   test('chain call', () => {
     const handler = () => storageItem.setValue('').setMaxAge(2).update().setValue(1);
     expect(handler).not.toThrowError(Error);
     expect(storageItem.value).toBe(getItem(key).value);
-  })
+  });
 
   test('set value and not clear maxAge', () => {
     storageItem.setMaxAge(100).setValue('');
     expect(storageItem.maxAge).toBe(100);
   });
-
-})
+});
