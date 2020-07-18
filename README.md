@@ -68,7 +68,7 @@ import LightStorage from 'light-storage';
 
 3. Get data
 
-   >  Note: return `undefined` if none existed
+   > **Note**: return `undefined` if none existed
 
    - Get the current value associated with the given key.
 
@@ -102,6 +102,34 @@ import LightStorage from 'light-storage';
      storage.clear();
      ```
 
+5. Watch
+
+   > **Note**: since v1.1.0, based on [`@xunmi/event-channel`](https://github.com/xunmi1/event-channel).
+   
+   - Watch the change of a value associated with the given key.
+   
+     ```js
+     const observer = value => {
+       // do something
+     };
+     storage.watch('key', observer);
+     ```
+   
+   - Unwatch that stops firing the observer.
+   
+     ```js
+     storage.unwatch('key', observer);
+     ```
+   
+   - Using call chaining.
+   
+     ```js
+     // watch
+     storage.select('key').watch(observer);
+     // unwatch
+     storage.select('key').unwatch(observer);
+     ```
+   
 ### Other Usage
 1. Get all keys currently present.
 
@@ -128,7 +156,7 @@ import LightStorage from 'light-storage';
    
 4. Synchronize data in the localStorage, and check validity
 
-   > use for localStorage is used directly, and it does not meet expectations
+   > **Note**: use for localStorage is used directly, and it does not meet expectations
 
    ```js
    storage.reload();

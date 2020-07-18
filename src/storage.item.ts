@@ -1,6 +1,6 @@
 import { StorageValue } from './interfaces';
 import { SubjectItem } from './subject';
-import LightStorage from './index';
+import type LightStorage from './index';
 
 class LightStorageItem<T> extends SubjectItem<LightStorage> {
   protected readonly context: this;

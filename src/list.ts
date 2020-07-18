@@ -10,7 +10,7 @@ interface List<T> {
 class CustomSet<T> implements List<T> {
   private data: T[];
   constructor(list: T[] = []) {
-    this.data = [...list];
+    this.data = list.slice();
   }
 
   get size() {

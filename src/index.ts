@@ -105,21 +105,19 @@ class LightStorage extends Subject {
     if (data) {
       if (!this.isFormSelf(key, data)) return data;
       const { time, maxAge } = data;
+      // if not expiration
       if (!(time && maxAge)) return data;
+      // if within the validity period
       if (LightStorage.isValid(time, maxAge)) {
         if (!this.timers[key]) this.startTimer(key, time, maxAge);
         return data;
       }
     }
     this.remove(key);
-    return;
   }
 
   /**
    * use timer for expiration
-   * @param key
-   * @param time
-   * @param maxAge
    */
   private startTimer(key: string, time: number, maxAge: number) {
     const remaining = time + maxAge - Date.now();
@@ -127,8 +125,10 @@ class LightStorage extends Subject {
   }
 
   private abortTimer(key: string) {
-    if (this.timers[key]) window.clearTimeout(this.timers[key]);
-    this.timers[key] = undefined;
+    if (this.timers[key]) {
+      window.clearTimeout(this.timers[key]);
+      this.timers[key] = undefined;
+    }
   }
 
   private static isValid(time: number, maxAge: number): boolean {
