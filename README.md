@@ -11,6 +11,7 @@ A lightweight tool for handing localStorage.
 - Using prefix to avoid key collisions
 - Support expiration
 - Support call chaining
+- Observer Pattern
 - 100% test coverage
 
 ### Install
@@ -106,10 +107,12 @@ import LightStorage from 'light-storage';
 
    > **Note**: since v1.1.0, based on [`@xunmi/event-channel`](https://github.com/xunmi1/event-channel).
    
+   > **Warning**: can't watch if you use native operations (e.g. localStorage.setItem, removeItem.) 
+                                                                                                                          >
    - Watch the change of a value associated with the given key.
    
      ```js
-     const observer = value => {
+     const observer = (value, oldValue) => {
        // do something
      };
      storage.watch('key', observer);

@@ -1,6 +1,6 @@
 import { version } from '../package.json';
 import { StorageValue, SetOptions } from './interfaces';
-import { isObject, isNumber, startsWith } from './utils';
+import { isObject, isNumber, startsWith, hasOwn } from './utils';
 import LightStorageItem from './storage.item';
 import List from './list';
 import { Subject } from './subject';
@@ -67,8 +67,8 @@ class LightStorage extends Subject {
     this._keys = new List(_keys);
   }
 
-  private isFormSelf<T>(key: string, data: StorageValue<T>) {
-    return this._keys.has(key) && data.version !== undefined;
+  private static isFormSelf<T>(data: any): data is StorageValue<T> {
+    return isObject(data) && hasOwn(data, 'version');
   }
 
   private getCompleteData<T>(key: string): StorageValue<T> | undefined {
@@ -80,9 +80,8 @@ class LightStorage extends Subject {
     }
 
     try {
-      this._keys.add(key);
       const data = JSON.parse(origin);
-      return isObject(data) ? data : { value: data };
+      return LightStorage.isFormSelf<T>(data) ? data : { value: data };
     } catch {
       return { value: (origin as unknown) as T };
     }
@@ -100,20 +99,25 @@ class LightStorage extends Subject {
   /** @internal  */
   private handleExpired<T = any>(key: string) {
     key = this.getCompleteKey(key);
+    this._keys.add(key);
     const data = this.getCompleteData<T>(key);
+    if (!data) return;
 
-    if (data) {
-      if (!this.isFormSelf(key, data)) return data;
-      const { time, maxAge } = data;
-      // if not expiration
-      if (!(time && maxAge)) return data;
-      // if within the validity period
-      if (LightStorage.isValid(time, maxAge)) {
+    const { time, maxAge } = data;
+    // if it has expiration
+    if (maxAge != null && time != null) {
+      const isValid = LightStorage.isValid(time, maxAge);
+      // if it within the validity period, start timer
+      if (isValid) {
         if (!this.timers[key]) this.startTimer(key, time, maxAge);
-        return data;
+      } else {
+        // expired
+        this.remove(key);
+        return;
       }
     }
-    this.remove(key);
+
+    return data;
   }
 
   /**
@@ -157,7 +161,8 @@ class LightStorage extends Subject {
     const data: StorageValue<T> = { value, version: LightStorage.version };
     const { maxAge, update } = options ?? {};
     const now = Date.now();
-    data.time = update ? now : this.getCreatedTime(key) ?? now;
+    const oldData = this.handleExpired(key);
+    data.time = update ? now : oldData?.time ?? now;
 
     this.abortTimer(key);
 
@@ -172,8 +177,8 @@ class LightStorage extends Subject {
     this.localStorage.setItem(key, JSON.stringify(data));
     this._keys.add(key);
 
-    // notice `set` handler
-    this.notify(this.getSimplifyKey(key), value);
+    // notify `set` handler
+    this.notify<T, any>(this.getSimplifyKey(key), value, oldData?.value);
   }
 
   /**
@@ -216,10 +221,11 @@ class LightStorage extends Subject {
    */
   remove(key: string) {
     key = this.getCompleteKey(key);
+    const data = this.getCompleteData(key);
     this.abortTimer(key);
     this.localStorage.removeItem(key);
     this._keys.delete(key);
-    this.notify(this.getSimplifyKey(key), undefined);
+    this.notify(this.getSimplifyKey(key), undefined, data?.value);
   }
 
   /**
@@ -227,9 +233,10 @@ class LightStorage extends Subject {
    */
   clear() {
     this._keys.forEach(key => {
+      const data = this.getCompleteData(key);
       this.abortTimer(key);
       this.localStorage.removeItem(key);
-      this.notify(this.getSimplifyKey(key), undefined);
+      this.notify(this.getSimplifyKey(key), undefined, data?.value);
     });
 
     this._keys.clear();

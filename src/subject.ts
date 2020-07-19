@@ -2,14 +2,14 @@ import EventChannel from '@xunmi/event-channel';
 import { Observer } from './interfaces';
 
 export abstract class Subject {
-  private readonly event: EventChannel<Observer>;
+  private readonly event: EventChannel<Observer<any, any>>;
 
   protected constructor() {
     this.event = new EventChannel();
   }
 
-  protected notify(key: string, ...rest: Parameters<Observer>) {
-    this.event.emit(key, ...rest);
+  protected notify<T extends any, U = T>(key: string, ...rest: Parameters<Observer<T, U>>) {
+    if (rest[0] !== rest[1]) this.event.emit(key, ...rest);
   }
 
   /**
@@ -18,7 +18,7 @@ export abstract class Subject {
    * @param observer
    * @since v1.1.0
    */
-  watch(key: string, observer: Observer) {
+  watch<T extends any, U = T>(key: string, observer: Observer<T, U>) {
     this.event.on(key, observer);
   }
 
@@ -28,7 +28,7 @@ export abstract class Subject {
    * @param observer
    * @since v1.1.0
    */
-  unwatch(key: string, observer?: Observer) {
+  unwatch<T extends any, U = T>(key: string, observer?: Observer<T, U>) {
     this.event.off(key, observer);
   }
 }
@@ -43,7 +43,7 @@ export abstract class SubjectItem<T extends Subject> {
    * @param observer
    * @since v1.1.0
    */
-  watch(observer: Observer) {
+  watch<T extends any, U = T>(observer: Observer<T, U>) {
     this.instance.watch(this.key, observer);
     return this.context;
   }
@@ -53,7 +53,7 @@ export abstract class SubjectItem<T extends Subject> {
    * @param observer
    * @since v1.1.0
    */
-  unwatch(observer?: Observer) {
+  unwatch<T extends any, U = T>(observer?: Observer<T, U>) {
     this.instance.unwatch(this.key, observer);
     return this.context;
   }

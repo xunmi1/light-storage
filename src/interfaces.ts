@@ -18,6 +18,6 @@ export interface SetOptions {
   update?: boolean;
 }
 
-export interface Observer {
-  (value: unknown): void;
+export interface Observer<T, U> {
+  (value: T, oldValue: U): void;
 }
