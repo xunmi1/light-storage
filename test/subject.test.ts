@@ -3,56 +3,60 @@ import { toBeWithinRange } from './utils';
 
 expect.extend({ toBeWithinRange });
 
-const storage = new LightStorage('test');
+const PREFIX = 'TEST';
+const storage = new LightStorage(PREFIX);
 
 describe('instance watch', () => {
   test('watch a key', done => {
     let count = 0;
-    const val = 'value';
-    const observer = (value: any) => {
+    const [key, originData, newData] = ['key', 'origin', 'new'];
+    window.localStorage.setItem(`${PREFIX}-${key}`, JSON.stringify({ value: originData, version: '*' }));
+
+    const observer = (val: string, oldVal: any) => {
       count++;
       switch (count) {
         case 1:
-          expect(value).toBeUndefined();
-          break;
-        case 2:
-          expect(value).toBe(val);
+          expect(val).toBe(newData);
+          expect(oldVal).toBe(originData);
           setTimeout(() => done(), 100);
           break;
         // if unwatch fail, throw error
-        case 3:
+        case 2:
           done(new Error());
           break;
       }
     };
-    storage.watch('key', observer);
-    storage.set('key', val);
+    storage.watch<string>(key, observer);
+    storage.set(key, newData);
 
-    storage.unwatch('key', observer);
-    storage.set('key', val);
+    storage.unwatch(key, observer);
+    storage.set(key, '');
   });
 
   test('watch with expiration', done => {
     let count = 0;
     let time: number = 0;
-    const val = 'expiration';
-    const key = 'watch-expiration';
-    const maxAge = 20;
-    const observer = (value: any) => {
+    const [key, data, maxAge] = ['watch-expiration', 'expiration', 20];
+    const observer = (val: any, oldVal: any) => {
       count++;
       switch (count) {
-        case 2:
+        case 1:
           time = Date.now();
-          expect(value).toBe(val);
+
+          expect(val).toBe(data);
+          expect(oldVal).toBeUndefined();
           break;
-        case 3:
-          expect(value).toBeUndefined();
+        // when expired
+        case 2:
+          expect(val).toBeUndefined();
+          expect(oldVal).toBe(data);
+          // test interval
           expect(Date.now() - time).toBeWithinRange(maxAge - 3, maxAge + 3);
           done();
       }
     };
     storage.watch(key, observer);
-    storage.set(key, val, { maxAge });
+    storage.set(key, data, { maxAge });
   });
 });
 
@@ -61,25 +65,23 @@ describe('instance item watch', () => {
 
   test('watch a key', done => {
     let count = 0;
-    const val = 'val';
-    const observer = (value: any) => {
+    const data = 'data';
+    const observer = (val: any, oldVal: any) => {
       count++;
       switch (count) {
         case 1:
-          expect(value).toBeUndefined();
-          break;
-        case 2:
-          expect(value).toBe(val);
+          expect(val).toBe(data);
+          expect(oldVal).toBeUndefined();
           setTimeout(() => done(), 100);
           break;
         // if unwatch fail, throw error
-        case 3:
+        case 2:
           done(new Error());
           break;
       }
     };
     storageItem.watch(observer);
-    storageItem.setValue(val);
+    storageItem.setValue(data);
 
     storageItem.unwatch(observer);
     storageItem.setValue('');

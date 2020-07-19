@@ -50,7 +50,7 @@ describe('check prefix', () => {
 describe('get data', () => {
   const key = 'origin value';
   const originKey = `${PREFIX}-${key}`;
-  const origin = JSON.stringify({ value: true });
+  const origin = JSON.stringify({ value: true, version: '*' });
 
   test('get origin value', () => {
     window.localStorage.setItem(originKey, origin);

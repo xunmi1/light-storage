@@ -13,7 +13,7 @@
     "build-ts": "rimraf .cache && tsc -p tsconfig.json --outDir .cache",
     "build-rollup": "rimraf dist && rollup -c scripts/rollup.config.js  -i .cache/src/index.js",
     "build-dts": "api-extractor run --local --typescript-compiler-folder \"node_modules/typescript\"",
-    "lint": "prettier --write --parser typescript \"src/**/*.ts\"",
+    "lint": "prettier --write --parser typescript \"**/*.ts\"",
     "test": "rimraf coverage && jest --runInBand"
   },
   "repository": {
