@@ -105,7 +105,7 @@ class LightStorage extends Subject {
 
     const { time, maxAge } = data;
     // if it has expiration
-    if (maxAge != null && time != null) {
+    if (isNumber(maxAge) && isNumber(time)) {
       const isValid = LightStorage.isValid(time, maxAge);
       // if it within the validity period, start timer
       if (isValid) {
@@ -232,6 +232,7 @@ class LightStorage extends Subject {
    * Clear all data with the current prefix
    */
   clear() {
+    this.collectKeys();
     this._keys.forEach(key => {
       const data = this.getCompleteData(key);
       this.abortTimer(key);

@@ -177,6 +177,7 @@ describe('remove one', () => {
 });
 
 describe('cleanup', () => {
+  window.localStorage.setItem(`${PREFIX}-cleanup`, '');
   instance.set('mock', true);
   instance.clear();
   const keys = Object.keys(window.localStorage).filter(k => k.startsWith(PREFIX));

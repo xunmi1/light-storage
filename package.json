@@ -1,6 +1,6 @@
 {
   "name": "light-storage",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A lightweight tool for handing localStorage.",
   "main": "dist/light-storage.umd.js",
   "module": "dist/light-storage.esm.js",
