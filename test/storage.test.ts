@@ -115,8 +115,8 @@ describe('check maxAge', () => {
     expect(instance.getMaxAge(key)).toBeUndefined();
   });
 
-  test('update maxAge', async () => {
-    const key = 'maxAge';
+  test('update maxAge with lower', async () => {
+    const key = 'maxAge-lower';
     instance.set(key, mockData, { maxAge: 20 });
     instance.set(key, mockData, { maxAge: 10 });
     expect(instance.getMaxAge(key)).toBe(10);
@@ -124,19 +124,27 @@ describe('check maxAge', () => {
     expect(instance.get(key)).toBeUndefined();
   });
 
-  test('update created time', async () => {
-    const key = 'createdTime';
-    instance.set(key, mockData, { maxAge: 20 });
-    await delay(10);
-    instance.set(key, mockData, { maxAge: 20, update: true });
-    await delay(5);
+  test('update maxAge with cover', async () => {
+    const key = 'maxAge-cover';
+    instance.set(key, mockData, { maxAge: 10 });
+    await delay(15);
+    instance.set(key, mockData, { maxAge: 10 });
     expect(instance.get(key)).toBe(mockData);
-    await delay(20);
+  });
+
+  test('update maxAge and created time', async () => {
+    const key = 'maxAge-createdTime';
+    instance.set(key, mockData, { maxAge: 15 });
+    await delay(10);
+    instance.set(key, mockData, { maxAge: 15, update: true });
+    await delay(10);
+    expect(instance.get(key)).toBe(mockData);
+    await delay(10);
     expect(instance.get(key)).toBeUndefined();
   });
 
   test('set maxAge with native setItem', async () => {
-    const key = 'maxAge-with-native';
+    const key = 'maxAge-native';
     const originKey = `${PREFIX}-${key}`;
     const time = Date.now();
     const setItem = (data: any) => window.localStorage.setItem(originKey, JSON.stringify(data));
