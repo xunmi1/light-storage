@@ -9,12 +9,13 @@
     "dist"
   ],
   "scripts": {
-    "build": "npm run build-ts && npm run build-rollup && npm run build-dts && rimraf .cache",
+    "build": "npm run lint && npm run build-ts && npm run build-rollup && npm run build-dts && rimraf .cache",
     "build-ts": "rimraf .cache && tsc -p tsconfig.json --outDir .cache",
     "build-rollup": "rimraf dist && rollup -c scripts/rollup.config.js  -i .cache/src/index.js",
     "build-dts": "api-extractor run --local --typescript-compiler-folder \"node_modules/typescript\"",
     "lint": "prettier --write --parser typescript \"**/*.ts\"",
-    "test": "rimraf coverage && jest --runInBand"
+    "test": "rimraf coverage && jest --runInBand",
+    "release": "npm test && npm run build && npm publish"
   },
   "repository": {
     "type": "git",
@@ -32,20 +33,20 @@
   },
   "homepage": "https://github.com/xunmi1/light-storage#readme",
   "devDependencies": {
-    "@types/jest": "^26.0.3",
-    "@babel/core": "^7.10.4",
+    "@babel/core": "^7.10.5",
     "@babel/preset-env": "^7.10.4",
     "@babel/preset-typescript": "^7.10.4",
     "@microsoft/api-extractor": "^7.9.2",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^8.4.0",
-    "@xunmi/event-channel": "^1.0.0",
+    "@types/jest": "^26.0.7",
+    "@xunmi/event-channel": "^1.0.1",
     "@xunmi/prettier-config": "^1.0.1",
     "babel-jest": "^26.1.0",
+    "jest": "^26.1.0",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.2",
-    "jest": "^26.1.0",
-    "rollup": "^2.22.0",
+    "rollup": "^2.23.0",
     "rollup-plugin-terser": "^6.1.0",
     "typescript": "^3.9.7"
   },
