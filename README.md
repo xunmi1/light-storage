@@ -18,16 +18,16 @@ A lightweight tool for handing localStorage.
 
 - NPM
 
-  ```shell script
-  npm install light-storage
+  ```bash
+  npm install --save light-storage
   # or
   yarn add light-storage
   ```
-  
+
   ```js
   import LightStorage from 'light-storage';
   ```
-  
+
 - CDN
 
   ```html
@@ -46,28 +46,31 @@ A lightweight tool for handing localStorage.
 - Set data
 
   - Set the value with the given key, creating a new value if none existed.
-     
+
     ```js
     storage.set('key', 'example');
     ```
-    
+
   - Set the value that expires 2 minutes from now.
-     
+
     ```js
     storage.set('key', 'example', { maxAge: 2 * 60 * 1000 });
     ```
-    
+
     If you need to time again, set `update` to `true`.
-    
+
     ```js
     storage.set('key', 'example', { maxAge: 2 * 60 * 1000, update: true });
     ```
-    
+
   - Using call chaining.
-  
+
     ```js
-    storage.select('key').setValue('example').setMaxAge(2 * 60 * 1000);
-    
+    storage
+      .select('key')
+      .setValue('example')
+      .setMaxAge(2 * 60 * 1000);
+
     // if need to update creation time
     storage.select('key').update();
     ```
@@ -75,14 +78,14 @@ A lightweight tool for handing localStorage.
 - Get data
 
   > **Note**: return `undefined` if none existed
-  
+
   - Get the current value associated with the given key.
 
     ```js
     storage.get('key');
     ```
-     
-   - Using call chaining.
+
+  - Using call chaining.
 
     ```js
     storage.select('key').value;
@@ -111,50 +114,49 @@ A lightweight tool for handing localStorage.
 - Watch
 
   > **Note**: since v1.1.0, based on [`@xunmi/event-channel`](https://github.com/xunmi1/event-channel).
-  
-  > **Warning**: can't watch if you use native operations (e.g. localStorage.setItem, removeItem.) 
-      
+  > **Warning**: can't watch if you use native operations (e.g. localStorage.setItem).
+
   - Watch the change of a value associated with the given key.
-  
+
     ```js
     const observer = (value, oldValue) => {
       // do something
     };
-    
+
     storage.watch('key', observer);
     ```
-  
+
   - Unwatch that stops firing the observer.
-  
+
     ```js
     storage.unwatch('key', observer);
     ```
-  
+
   - Using call chaining.
-  
+
     ```js
     // watch
     storage.select('key').watch(observer);
-    
+
     // unwatch
     storage.select('key').unwatch(observer);
     ```
-  
+
 ### Other Usage
 
-- Get all keys currently present.
+- Get all keys.
 
   ```js
   storage.keys;
   ```
 
-- Set the current prefix.
+- Set a new prefix to replace the original prefix.
 
   ```js
-  storage.prefix = 'NEW_PREFIX'
+  storage.prefix = 'NEW_PREFIX';
   ```
 
-- Get other metadata associated with the given key
+- Get other metadata associated with the given key.
 
   ```js
   // return the created time
@@ -164,11 +166,11 @@ A lightweight tool for handing localStorage.
   // whether it contains the key
   storage.has('key');
   ```
-   
-- Synchronize data in the localStorage, and check validity
 
-  > **Note**: use for localStorage is used directly, and it does not meet expectations
-  
+- Synchronize data in the localStorage, and check validity.
+
+  > **Note**: If you use localstorage directly and things don't work as expected, you may need to use this function.
+
   ```js
   storage.reload();
   ```
