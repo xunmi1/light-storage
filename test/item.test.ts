@@ -1,7 +1,7 @@
 import LightStorage from '../src';
 import StorageItem from '../src/storage.item';
 
-const PREFIX = 'test';
+const PREFIX = 'TEST_ITEM';
 const instance = new LightStorage(PREFIX);
 const getItem = (key: string) => {
   const data = window.localStorage.getItem(`${PREFIX}-${key}`);
