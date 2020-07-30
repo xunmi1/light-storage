@@ -114,6 +114,7 @@ A lightweight tool for handing localStorage.
 - Watch
 
   > **Note**: since v1.1.0, based on [`@xunmi/event-channel`](https://github.com/xunmi1/event-channel).
+  >
   > **Warning**: can't watch if you use native operations (e.g. localStorage.setItem).
 
   - Watch the change of a value associated with the given key.

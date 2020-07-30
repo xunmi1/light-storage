@@ -5,6 +5,8 @@ import LightStorageItem from './storage.item';
 import List from './list';
 import { Subject } from './subject';
 
+export type { SetOptions };
+
 /**
  * LightStorage
  * @public

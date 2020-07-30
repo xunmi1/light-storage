@@ -29,7 +29,7 @@ describe('instance watch', () => {
     storage.set(key, data, { maxAge });
 
     await delay(30);
-    
+
     expect(observer.mock.calls.length).toBe(2);
     expect(observer.mock.calls[0]).toEqual([data, undefined]);
     expect(observer.mock.calls[1]).toEqual([undefined, data]);
