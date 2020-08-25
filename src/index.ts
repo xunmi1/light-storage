@@ -1,11 +1,12 @@
 import { version } from '../package.json';
-import { StorageValue, SetOptions } from './interfaces';
+import { StorageValue, SetOptions, Observer } from './interfaces';
 import { isObject, isNumber, startsWith, hasOwn } from './utils';
 import LightStorageItem from './storage.item';
 import List from './list';
 import { Subject } from './subject';
 
-export type { SetOptions };
+// @public
+export type { SetOptions, Observer };
 
 /**
  * LightStorage
@@ -13,7 +14,7 @@ export type { SetOptions };
  */
 class LightStorage extends Subject {
   static readonly version = version;
-  static readonly Item = LightStorageItem;
+  private static readonly Item = LightStorageItem;
 
   private readonly localStorage: Storage;
   private _keys: List<string>;

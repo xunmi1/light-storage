@@ -1,6 +1,6 @@
 {
   "name": "light-storage",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "A lightweight tool for handing localStorage.",
   "main": "dist/light-storage.umd.js",
   "module": "dist/light-storage.esm.js",
@@ -33,10 +33,10 @@
   },
   "homepage": "https://github.com/xunmi1/light-storage#readme",
   "devDependencies": {
-    "@babel/core": "^7.11.1",
+    "@babel/core": "^7.11.4",
     "@babel/preset-env": "^7.11.0",
     "@babel/preset-typescript": "^7.10.4",
-    "@microsoft/api-extractor": "^7.9.6",
+    "@microsoft/api-extractor": "^7.9.10",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^9.0.0",
     "@types/jest": "^26.0.10",
@@ -46,9 +46,9 @@
     "jest": "^26.4.0",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.2",
-    "rollup": "^2.26.4",
+    "rollup": "^2.26.5",
     "rollup-plugin-terser": "^7.0.0",
-    "typescript": "^3.9.7"
+    "typescript": "^4.0.2"
   },
   "prettier": "@xunmi/prettier-config"
 }
