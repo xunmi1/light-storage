@@ -5,13 +5,8 @@ import LightStorageItem from './storage.item';
 import List from './list';
 import { Subject } from './subject';
 
-// @public
-export type { SetOptions, Observer };
+export type { SetOptions, Observer, Subject };
 
-/**
- * LightStorage
- * @public
- */
 class LightStorage extends Subject {
   static readonly version = version;
   private static readonly Item = LightStorageItem;
