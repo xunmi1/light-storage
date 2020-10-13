@@ -4,6 +4,7 @@
 [![codecov](https://img.shields.io/codecov/c/github/xunmi1/light-storage?style=flat-square&logo=codecov)](https://codecov.io/gh/xunmi1/light-storage)
 [![npm bundle size](https://img.shields.io/bundlephobia/minzip/light-storage?style=flat-square)](https://www.npmjs.com/package/light-storage)
 [![npm version](https://img.shields.io/npm/v/light-storage?&style=flat-square&logo=npm)](https://www.npmjs.com/package/light-storage)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fxunmi1%2Flight-storage.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fxunmi1%2Flight-storage?ref=badge_shield)
 
 A lightweight tool for handing localStorage.
 
@@ -175,3 +176,7 @@ A lightweight tool for handing localStorage.
   ```js
   storage.reload();
   ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fxunmi1%2Flight-storage.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fxunmi1%2Flight-storage?ref=badge_large)
