@@ -2,7 +2,7 @@ import EventChannel from '@xunmi/event-channel';
 import { Observer } from './interfaces';
 
 export abstract class Subject {
-  private readonly event: EventChannel<Observer<any, any>>;
+  private readonly event: EventChannel<Observer>;
 
   protected constructor() {
     this.event = new EventChannel();

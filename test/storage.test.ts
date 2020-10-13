@@ -134,12 +134,12 @@ describe('check maxAge', () => {
 
   test('update maxAge and created time', async () => {
     const key = 'maxAge-createdTime';
-    instance.set(key, mockData, { maxAge: 15 });
-    await delay(10);
-    instance.set(key, mockData, { maxAge: 15, update: true });
-    await delay(10);
+    instance.set(key, mockData, { maxAge: 30 });
+    await delay(20);
+    instance.set(key, mockData, { maxAge: 30, update: true });
+    await delay(20);
     expect(instance.get(key)).toBe(mockData);
-    await delay(10);
+    await delay(20);
     expect(instance.get(key)).toBeUndefined();
   });
 
